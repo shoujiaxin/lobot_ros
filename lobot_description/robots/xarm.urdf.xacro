@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xarm">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.154 0.14 0.022"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.011"/>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.154 0.14 0.022"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.011"/>
+    </collision>
+  </link>
+  <link name="arm_link1">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.045"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.035" radius="0.045"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.0175"/>
+    </collision>
+  </link>
+  <joint name="arm_joint1" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0 0 0.022"/>
+    <parent link="base_link"/>
+    <child link="arm_link1"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="16" lower="-2.1" upper="2.1" velocity="2.5"/>
+  </joint>
+  <link name="arm_link2">
+    <visual>
+      <geometry>
+        <box size="0.032 0.045 0.096"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+      <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.032 0.045 0.05"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+    </collision>
+  </link>
+  <joint name="arm_joint2" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0.003 0 0.05"/>
+    <parent link="arm_link1"/>
+    <child link="arm_link2"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="16" lower="-1.57" upper="1.57" velocity="2"/>
+  </joint>
+  <link name="arm_link3">
+    <visual>
+      <geometry>
+        <box size="0.032 0.045 0.096"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+      <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.032 0.045 0.05"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+    </collision>
+  </link>
+  <joint name="arm_joint3" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0 0 0.096"/>
+    <parent link="arm_link2"/>
+    <child link="arm_link3"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="16" lower="-2" upper="2" velocity="2"/>
+  </joint>
+  <link name="arm_link4">
+    <visual>
+      <geometry>
+        <box size="0.032 0.045 0.05"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.032 0.045 0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.035"/>
+    </collision>
+  </link>
+  <joint name="arm_joint4" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0 0 0.096"/>
+    <parent link="arm_link3"/>
+    <child link="arm_link4"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="16" lower="-2" upper="2" velocity="2"/>
+  </joint>
+  <link name="arm_link5">
+    <visual>
+      <geometry>
+        <cylinder length="0.05" radius="0.016"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <material name="blue">
+        <color rgba="0.1 0.1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.05" radius="0.016"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+    </collision>
+  </link>
+  <joint name="arm_joint5" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <parent link="arm_link4"/>
+    <child link="arm_link5"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="16" lower="-2.1" upper="2.1" velocity="2.5"/>
+  </joint>
+  <link name="hand_link1">
+    <visual>
+      <geometry>
+        <box size="0.01 0.06 0.004"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.002"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.01 0.06 0.004"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.002"/>
+    </collision>
+  </link>
+  <joint name="hand_joint1" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <parent link="arm_link5"/>
+    <child link="hand_link1"/>
+  </joint>
+  <link name="hand_link2">
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.032"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.01 0.01 0.032"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+    </collision>
+  </link>
+  <joint name="hand_joint2" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 -0.03 0"/>
+    <parent link="hand_link1"/>
+    <child link="hand_link2"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="16" lower="0" upper="0.025" velocity="2"/>
+  </joint>
+  <link name="hand_link3">
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.032"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+      <material name="white">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.01 0.01 0.032"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+    </collision>
+  </link>
+  <joint name="hand_joint3" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0.03 0"/>
+    <parent link="hand_link1"/>
+    <child link="hand_link3"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="16" lower="-0.025" upper="0" velocity="2"/>
+  </joint>
+</robot>
