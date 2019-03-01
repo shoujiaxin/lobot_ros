@@ -1,0 +1,12 @@
+controller_list:
+  - name: fake_xarm_arm_controller
+    joints:
+      - arm_joint1
+      - arm_joint2
+      - arm_joint3
+      - arm_joint4
+      - arm_joint5
+  - name: fake_xarm_hand_controller
+    joints:
+      - hand_joint2
+      - hand_joint3
