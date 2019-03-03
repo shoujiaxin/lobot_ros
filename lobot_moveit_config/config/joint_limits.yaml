@@ -27,12 +27,12 @@ joint_limits:
     max_velocity: 2.5
     has_acceleration_limits: false
     max_acceleration: 0
-  hand_joint2:
+  gripper_joint1:
     has_velocity_limits: true
     max_velocity: 2
     has_acceleration_limits: false
     max_acceleration: 0
-  hand_joint3:
+  gripper_joint2:
     has_velocity_limits: true
     max_velocity: 2
     has_acceleration_limits: false

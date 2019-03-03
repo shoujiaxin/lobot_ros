@@ -148,7 +148,7 @@ xarm_arm:
     - SPARStwo
   projection_evaluator: joints(arm_joint1,arm_joint2)
   longest_valid_segment_fraction: 0.005
-xarm_hand:
+xarm_gripper:
   default_planner_config: None
   planner_configs:
     - SBL
@@ -174,3 +174,5 @@ xarm_hand:
     - LazyPRMstar
     - SPARS
     - SPARStwo
+  projection_evaluator: joints(gripper_joint1,gripper_joint2)
+  longest_valid_segment_fraction: 0.005
