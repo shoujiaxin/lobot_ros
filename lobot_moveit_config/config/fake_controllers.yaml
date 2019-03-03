@@ -9,4 +9,3 @@ controller_list:
   - name: fake_xarm_gripper_controller
     joints:
       - gripper_joint1
-      - gripper_joint2

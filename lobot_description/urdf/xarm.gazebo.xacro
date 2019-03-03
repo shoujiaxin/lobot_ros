@@ -24,4 +24,11 @@
     </inertial>
   </xacro:macro>
 
+  <!-- ros_control plugin -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/arm</robotNamespace>
+    </plugin>
+  </gazebo>
+
 </robot>
