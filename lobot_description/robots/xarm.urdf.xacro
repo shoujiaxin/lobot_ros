@@ -1,215 +1,256 @@
 <?xml version="1.0"?>
+
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xarm">
+
+  <!-- Define the colors used in this robot -->
+  <material name="Black">
+    <color rgba="0 0 0 1" />
+  </material>
+
+  <material name="White">
+    <color rgba="1 1 1 1" />
+  </material>
+
+  <material name="Blue">
+    <color rgba="0.1 0.1 1 1" />
+  </material>
+
+  <!-- base_link properties -->
+  <xacro:property name="base_link_length" value="0.154" />
+  <xacro:property name="base_link_width" value="0.14" />
+  <xacro:property name="base_link_height" value="0.022" />
+  <xacro:property name="base_link_geometry_origin">
+    <geometry>
+      <box size="${base_link_length} ${base_link_width} ${base_link_height}" />
+    </geometry>
+    <origin xyz="0 0 ${base_link_height/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- arm_link1 properties -->
+  <xacro:property name="arm_link1_length" value="0.05" />
+  <xacro:property name="arm_link1_radius" value="0.045" />
+  <xacro:property name="arm_link1_geometry_origin">
+    <geometry>
+      <cylinder length="${arm_link1_length}" radius="${arm_link1_radius}" />
+    </geometry>
+    <origin xyz="0 0 ${arm_link1_length/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- arm_link2 properties -->
+  <xacro:property name="arm_link2_length" value="0.032" />
+  <xacro:property name="arm_link2_width" value="0.045" />
+  <xacro:property name="arm_link2_height" value="0.096" />
+  <xacro:property name="arm_link2_geometry_origin">
+    <geometry>
+      <box size="${arm_link2_length} ${arm_link2_width} ${arm_link2_height}" />
+    </geometry>
+    <origin xyz="0 0 ${arm_link2_height/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- arm_link3 properties -->
+  <xacro:property name="arm_link3_length" value="0.032" />
+  <xacro:property name="arm_link3_width" value="0.045" />
+  <xacro:property name="arm_link3_height" value="0.096" />
+  <xacro:property name="arm_link3_geometry_origin">
+    <geometry>
+      <box size="${arm_link3_length} ${arm_link3_width} ${arm_link3_height}" />
+    </geometry>
+    <origin xyz="0 0 ${arm_link3_height/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- arm_link4 properties -->
+  <xacro:property name="arm_link4_length" value="0.032" />
+  <xacro:property name="arm_link4_width" value="0.045" />
+  <xacro:property name="arm_link4_height" value="0.05" />
+  <xacro:property name="arm_link4_geometry_origin">
+    <geometry>
+      <box size="${arm_link4_length} ${arm_link4_width} ${arm_link4_height}" />
+    </geometry>
+    <origin rpy="0 0 0" xyz="0 0 ${arm_link4_height/2}" />
+  </xacro:property>
+
+  <!-- arm_link5 properties -->
+  <xacro:property name="arm_link5_length" value="0.05" />
+  <xacro:property name="arm_link5_radius" value="0.016" />
+  <xacro:property name="arm_link5_geometry_origin">
+    <geometry>
+      <cylinder length="${arm_link5_length}" radius="${arm_link5_radius}" />
+    </geometry>
+    <origin xyz="0 0 ${arm_link5_length/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- gripper_link properties -->
+  <xacro:property name="gripper_link_length" value="0.01" />
+  <xacro:property name="gripper_link_width" value="0.06" />
+  <xacro:property name="gripper_link_height" value="0.004" />
+  <xacro:property name="gripper_link_geometry_origin">
+    <geometry>
+      <box size="${gripper_link_length} ${gripper_link_width} ${gripper_link_height}" />
+    </geometry>
+    <origin xyz="0 0 ${gripper_link_height/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!-- Gripper properties -->
+  <xacro:property name="gripper_length" value="0.01" />
+  <xacro:property name="gripper_width" value="0.01" />
+  <xacro:property name="gripper_height" value="0.032" />
+  <xacro:property name="gripper_geometry_origin">
+    <geometry>
+      <box size="${gripper_length} ${gripper_width} ${gripper_height}" />
+    </geometry>
+    <origin xyz="0 0 ${gripper_height/2}" rpy="0 0 0" />
+  </xacro:property>
+
+  <!--////////// BASE_LINK //////////-->
   <link name="base_link">
     <visual>
-      <geometry>
-        <box size="0.154 0.14 0.022"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.011"/>
-      <material name="black">
-        <color rgba="0 0 0 1"/>
-      </material>
+      <xacro:insert_block name="base_link_geometry_origin" />
+      <material name="Black" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.154 0.14 0.022"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.011"/>
+      <xacro:insert_block name="base_link_geometry_origin" />
     </collision>
   </link>
+
+  <!--////////// ARM_LINK1 //////////-->
   <link name="arm_link1">
     <visual>
-      <geometry>
-        <cylinder length="0.05" radius="0.045"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.025"/>
-      <material name="blue">
-        <color rgba="0.1 0.1 1 1"/>
-      </material>
+      <xacro:insert_block name="arm_link1_geometry_origin" />
+      <material name="Blue" />
     </visual>
     <collision>
-      <geometry>
-        <cylinder length="0.035" radius="0.045"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.0175"/>
+      <xacro:insert_block name="arm_link1_geometry_origin" />
     </collision>
   </link>
   <joint name="arm_joint1" type="revolute">
-    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-    <origin rpy="0 0 0" xyz="0 0 0.022"/>
-    <parent link="base_link"/>
-    <child link="arm_link1"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="16" lower="-2.1" upper="2.1" velocity="2.5"/>
+    <origin xyz="0 0 ${base_link_height}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="arm_link1" />
+    <axis xyz="0 0 1" />
+    <limit lower="${-pi*2/3}" upper="${pi*2/3}" effort="16" velocity="2.5" />
   </joint>
+
+  <!--////////// ARM_LINK2 //////////-->
   <link name="arm_link2">
     <visual>
-      <geometry>
-        <box size="0.032 0.045 0.096"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.048"/>
-      <material name="blue">
-        <color rgba="0.1 0.1 1 1"/>
-      </material>
+      <xacro:insert_block name="arm_link2_geometry_origin" />
+      <material name="Blue" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.032 0.045 0.05"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+      <xacro:insert_block name="arm_link2_geometry_origin" />
     </collision>
   </link>
   <joint name="arm_joint2" type="revolute">
-    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-    <origin rpy="0 0 0" xyz="0.003 0 0.05"/>
-    <parent link="arm_link1"/>
-    <child link="arm_link2"/>
-    <axis xyz="0 1 0"/>
-    <limit effort="16" lower="-1.57" upper="1.57" velocity="2"/>
+    <origin xyz="0.003 0 ${arm_link1_length}" rpy="0 0 0" />
+    <parent link="arm_link1" />
+    <child link="arm_link2" />
+    <axis xyz="0 1 0" />
+    <limit lower="${-pi/2}" upper="${pi/2}" effort="16" velocity="2" />
   </joint>
+
+  <!--////////// ARM_LINK3 //////////-->
   <link name="arm_link3">
     <visual>
-      <geometry>
-        <box size="0.032 0.045 0.096"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.048"/>
-      <material name="blue">
-        <color rgba="0.1 0.1 1 1"/>
-      </material>
+      <xacro:insert_block name="arm_link3_geometry_origin" />
+      <material name="Blue" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.032 0.045 0.05"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.048"/>
+      <xacro:insert_block name="arm_link3_geometry_origin" />
     </collision>
   </link>
   <joint name="arm_joint3" type="revolute">
-    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-    <origin rpy="0 0 0" xyz="0 0 0.096"/>
-    <parent link="arm_link2"/>
-    <child link="arm_link3"/>
-    <axis xyz="0 1 0"/>
-    <limit effort="16" lower="-2" upper="2" velocity="2"/>
+    <origin xyz="0 0 ${arm_link2_height}" rpy="0 0 0" />
+    <parent link="arm_link2" />
+    <child link="arm_link3" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2" upper="2" effort="16" velocity="2" />
   </joint>
+
+  <!--////////// ARM_LINK4 //////////-->
   <link name="arm_link4">
     <visual>
-      <geometry>
-        <box size="0.032 0.045 0.05"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.025"/>
-      <material name="blue">
-        <color rgba="0.1 0.1 1 1"/>
-      </material>
+      <xacro:insert_block name="arm_link4_geometry_origin" />
+      <material name="Blue" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.032 0.045 0.03"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.035"/>
+      <xacro:insert_block name="arm_link4_geometry_origin" />
     </collision>
   </link>
   <joint name="arm_joint4" type="revolute">
-    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-    <origin rpy="0 0 0" xyz="0 0 0.096"/>
-    <parent link="arm_link3"/>
-    <child link="arm_link4"/>
-    <axis xyz="0 1 0"/>
-    <limit effort="16" lower="-2" upper="2" velocity="2"/>
+    <origin xyz="0 0 ${arm_link3_height}" rpy="0 0 0" />
+    <parent link="arm_link3" />
+    <child link="arm_link4" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2" upper="2" effort="16" velocity="2" />
   </joint>
+
+  <!--////////// ARM_LINK5 //////////-->
   <link name="arm_link5">
     <visual>
-      <geometry>
-        <cylinder length="0.05" radius="0.016"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.025"/>
-      <material name="blue">
-        <color rgba="0.1 0.1 1 1"/>
-      </material>
+      <xacro:insert_block name="arm_link5_geometry_origin" />
+      <material name="Blue" />
     </visual>
     <collision>
-      <geometry>
-        <cylinder length="0.05" radius="0.016"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <xacro:insert_block name="arm_link5_geometry_origin" />
     </collision>
   </link>
   <joint name="arm_joint5" type="revolute">
-    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-    <origin rpy="0 0 0" xyz="0 0 0.05"/>
-    <parent link="arm_link4"/>
-    <child link="arm_link5"/>
-    <axis xyz="0 0 1"/>
-    <limit effort="16" lower="-2.1" upper="2.1" velocity="2.5"/>
+    <origin xyz="0 0 ${arm_link4_height}" rpy="0 0 0" />
+    <parent link="arm_link4" />
+    <child link="arm_link5" />
+    <axis xyz="0 0 1" />
+    <limit lower="${-pi*2/3}" upper="${pi*2/3}" effort="16" velocity="2.5" />
   </joint>
-  <link name="hand_link1">
+
+  <!--////////// GRIPPER_LINK //////////-->
+  <link name="gripper_link">
     <visual>
-      <geometry>
-        <box size="0.01 0.06 0.004"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.002"/>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
+      <xacro:insert_block name="gripper_link_geometry_origin" />
+      <material name="White" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.01 0.06 0.004"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.002"/>
+      <xacro:insert_block name="gripper_link_geometry_origin" />
     </collision>
   </link>
-  <joint name="hand_joint1" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.05"/>
-    <parent link="arm_link5"/>
-    <child link="hand_link1"/>
+  <joint name="arm_to_gripper" type="fixed">
+    <origin xyz="0 0 ${arm_link5_length}" rpy="0 0 0" />
+    <parent link="arm_link5" />
+    <child link="gripper_link" />
   </joint>
-  <link name="hand_link2">
+
+  <!--////////// LEFT_GRIPPER //////////-->
+  <link name="left_gripper">
     <visual>
-      <geometry>
-        <box size="0.01 0.01 0.032"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.016"/>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
+      <xacro:insert_block name="gripper_geometry_origin" />
+      <material name="White" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.01 0.01 0.032"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+      <xacro:insert_block name="gripper_geometry_origin" />
     </collision>
   </link>
-  <joint name="hand_joint2" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 -0.03 0"/>
-    <parent link="hand_link1"/>
-    <child link="hand_link2"/>
-    <axis xyz="0 1 0"/>
-    <limit effort="16" lower="0" upper="0.025" velocity="2"/>
+  <joint name="gripper_joint1" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 ${-gripper_link_width/2} 0" />
+    <parent link="gripper_link" />
+    <child link="left_gripper" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="0.025" effort="16" velocity="2" />
   </joint>
-  <link name="hand_link3">
+
+  <!--////////// RIGHT_GRIPPER //////////-->
+  <link name="right_rigpper">
     <visual>
-      <geometry>
-        <box size="0.01 0.01 0.032"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.016"/>
-      <material name="white">
-        <color rgba="1 1 1 1"/>
-      </material>
+      <xacro:insert_block name="gripper_geometry_origin" />
+      <material name="White" />
     </visual>
     <collision>
-      <geometry>
-        <box size="0.01 0.01 0.032"/>
-      </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0.016"/>
+      <xacro:insert_block name="gripper_geometry_origin" />
     </collision>
   </link>
-  <joint name="hand_joint3" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 0.03 0"/>
-    <parent link="hand_link1"/>
-    <child link="hand_link3"/>
-    <axis xyz="0 1 0"/>
-    <limit effort="16" lower="-0.025" upper="0" velocity="2"/>
+  <joint name="gripper_joint2" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 ${gripper_link_width/2} 0" />
+    <parent link="gripper_link" />
+    <child link="right_rigpper" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.025" upper="0" effort="16" velocity="2" />
   </joint>
 </robot>
