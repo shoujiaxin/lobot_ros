@@ -2,6 +2,8 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="xarm">
 
+  <xacro:include filename="$(find lobot_description)/urdf/xarm.transmission.xacro" />
+
   <!-- Define the colors used in this robot -->
   <material name="Black">
     <color rgba="0 0 0 1" />
