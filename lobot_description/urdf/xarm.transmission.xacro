@@ -6,11 +6,12 @@
     <transmission name="trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${joint_name}">
+        <!-- hardwareInterface must be EffortJointInterface when this transmission is loaded in Gazebo -->
+        <!-- <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface> -->
         <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       </joint>
       <actuator name="motor">
         <mechanicalReduction>1</mechanicalReduction>
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       </actuator>
     </transmission>
   </xacro:macro>

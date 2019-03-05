@@ -1,10 +1,10 @@
 <launch>
 
-  <!-- Parse xacro and set robot_description parameter -->
-  <param name="robot_description" command="$(find xacro)/xacro $(find lobot_description)/urdf/xarm.urdf.xacro" />
-
   <!-- Set gui parameter to true for display joint slider -->
   <param name="use_gui" value="true" />
+
+  <!-- Parse xacro and set robot_description parameter -->
+  <param name="robot_description" command="$(find xacro)/xacro $(find lobot_description)/urdf/xarm.urdf.xacro" />
 
   <!-- Start joint state publisher node which will publish joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />

@@ -121,7 +121,7 @@
     <collision>
       <xacro:insert_block name="base_link_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${base_link_length}" width="${base_link_width}" height="${base_link_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${base_link_length}" width="${base_link_width}" height="${base_link_height}" mass="2*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -135,7 +135,7 @@
     <collision>
       <xacro:insert_block name="arm_link1_geometry_origin" />
     </collision>
-    <xacro:cylinder_inertial_matrix radius="${arm_link1_radius}" length="${arm_link1_length}" mass="${base_mass}">
+    <xacro:cylinder_inertial_matrix radius="${arm_link1_radius}" length="${arm_link1_length}" mass="0.5*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:cylinder_inertial_matrix>
   </link>
@@ -157,7 +157,7 @@
     <collision>
       <xacro:insert_block name="arm_link2_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${arm_link2_length}" width="${arm_link2_width}" height="${arm_link2_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${arm_link2_length}" width="${arm_link2_width}" height="${arm_link2_height}" mass="0.15*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -167,6 +167,7 @@
     <child link="arm_link2" />
     <axis xyz="0 1 0" />
     <limit lower="${-pi/2}" upper="${pi/2}" effort="16" velocity="2" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 
   <!--////////// ARM_LINK3 //////////-->
@@ -178,7 +179,7 @@
     <collision>
       <xacro:insert_block name="arm_link3_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${arm_link3_length}" width="${arm_link3_width}" height="${arm_link3_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${arm_link3_length}" width="${arm_link3_width}" height="${arm_link3_height}" mass="0.15*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -188,6 +189,7 @@
     <child link="arm_link3" />
     <axis xyz="0 1 0" />
     <limit lower="-2" upper="2" effort="16" velocity="2" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 
   <!--////////// ARM_LINK4 //////////-->
@@ -199,7 +201,7 @@
     <collision>
       <xacro:insert_block name="arm_link4_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${arm_link4_length}" width="${arm_link4_width}" height="${arm_link4_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${arm_link4_length}" width="${arm_link4_width}" height="${arm_link4_height}" mass="0.07*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -209,6 +211,7 @@
     <child link="arm_link4" />
     <axis xyz="0 1 0" />
     <limit lower="-2" upper="2" effort="16" velocity="2" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 
   <!--////////// ARM_LINK5 //////////-->
@@ -220,7 +223,7 @@
     <collision>
       <xacro:insert_block name="arm_link5_geometry_origin" />
     </collision>
-    <xacro:cylinder_inertial_matrix radius="${arm_link5_radius}" length="${arm_link5_length}" mass="${base_mass}">
+    <xacro:cylinder_inertial_matrix radius="${arm_link5_radius}" length="${arm_link5_length}" mass="0.07${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:cylinder_inertial_matrix>
   </link>
@@ -230,6 +233,7 @@
     <child link="arm_link5" />
     <axis xyz="0 0 1" />
     <limit lower="${-pi*2/3}" upper="${pi*2/3}" effort="16" velocity="2.5" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 
   <!--////////// GRIPPER_LINK //////////-->
@@ -241,7 +245,7 @@
     <collision>
       <xacro:insert_block name="gripper_link_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${gripper_link_length}" width="${gripper_link_width}" height="${gripper_link_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${gripper_link_length}" width="${gripper_link_width}" height="${gripper_link_height}" mass="0.05*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -260,7 +264,7 @@
     <collision>
       <xacro:insert_block name="gripper_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${gripper_length}" width="${gripper_width}" height="${gripper_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${gripper_length}" width="${gripper_width}" height="${gripper_height}" mass="0.02*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -270,6 +274,7 @@
     <child link="left_gripper" />
     <axis xyz="0 1 0" />
     <limit lower="0" upper="0.025" effort="16" velocity="2" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 
   <!--////////// RIGHT_GRIPPER //////////-->
@@ -281,7 +286,7 @@
     <collision>
       <xacro:insert_block name="gripper_geometry_origin" />
     </collision>
-    <xacro:box_inertial_matrix length="${gripper_length}" width="${gripper_width}" height="${gripper_height}" mass="${base_mass}">
+    <xacro:box_inertial_matrix length="${gripper_length}" width="${gripper_width}" height="${gripper_height}" mass="0.02*${base_mass}">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:box_inertial_matrix>
   </link>
@@ -292,5 +297,6 @@
     <axis xyz="0 1 0" />
     <limit lower="-0.025" upper="0" effort="16" velocity="2" />
     <mimic joint="gripper_joint1" multiplier="-1" />
+    <dynamics damping="50" friction="1"/>
   </joint>
 </robot>

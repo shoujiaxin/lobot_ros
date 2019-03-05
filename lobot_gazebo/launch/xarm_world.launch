@@ -24,7 +24,7 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
     args="-urdf -model xarm -param robot_description" />
     
-  <!-- ros_control xarm launch file -->
+  <!-- ros_control launch file for xarm -->
   <include file="$(find lobot_control)/launch/xarm_control.launch" />
 
 </launch>
