@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- Load joint_state_controller -->
+  <rosparam file="$(find lobot_control)/config/joint_state_controller.yaml" command="load" />
+
+  <!-- Load joint controllers -->
+  <rosparam file="$(find lobot_control)/config/trajectory_control.yaml" command="load" />
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output = "screen" ns="/xarm"
+    args="joint_state_controller xarm_joint_controller" />
+
+</launch>
