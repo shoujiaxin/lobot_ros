@@ -1,0 +1,18 @@
+<package>
+  <description brief="lobot_driver">
+
+     lobot_driver
+
+  </description>
+  <author>shoujiaxin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lobot_driver</url>
+  <depend package="std_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="hardware_interface"/>
+  <depend package="controller_manager"/>
+
+</package>
+
+

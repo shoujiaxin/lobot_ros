@@ -11,8 +11,7 @@
   <depend package="controller_manager"/>
   <depend package="joint_state_controller"/>
   <depend package="robot_state_publisher"/>
-  <depend package="rqt_gui"/>
-  <depend package="effort_controllers"/>
+  <depend package="position_controllers"/>
 
 </package>
 
