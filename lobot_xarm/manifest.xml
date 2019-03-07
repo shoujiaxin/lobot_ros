@@ -1,0 +1,14 @@
+<package>
+  <description brief="lobot_xarm">
+
+     lobot_xarm
+
+  </description>
+  <author>shoujiaxin</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/lobot_xarm</url>
+
+</package>
+
+

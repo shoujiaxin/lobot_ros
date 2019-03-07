@@ -16,6 +16,7 @@ class MyHid {
   MyHid(const unsigned short vi, const unsigned short pi)
       : vendorId(vi), productId(pi) {}
 
+  void Close() { hid_close(myDevice); }
   unsigned short GetProductId() const { return productId; }
   unsigned short GetVendorId() const { return vendorId; }
   bool IsConnected() const { return connected; }
@@ -42,13 +43,17 @@ inline int MyHid::Open() {
     }
 
     // get permission
-    auto dev = hid_enumerate(vendorId, productId);
-    if (!dev) {
-      throw std::runtime_error("Cannot find HID device!");
-    }
-    std::string cmd = std::string("sudo chmod 666 ") + std::string(dev->path);
-    system(cmd.c_str());
-    hid_free_enumeration(dev);
+    // auto dev = hid_enumerate(vendorId, productId);
+    // if (!dev) {
+    //   throw std::runtime_error("Cannot find HID device!");
+    // }
+    // std::string cmdStr =
+    //     std::string("sudo chmod 666 ") + std::string(dev->path);
+    // hid_free_enumeration(dev);
+    // const char *cmd = cmdStr.c_str();
+    // if (system(cmd)) {
+    //   throw std::runtime_error("Cannot get permission to device!");
+    // }
 
     myDevice = hid_open(vendorId, productId, nullptr);
     if (!myDevice) {
