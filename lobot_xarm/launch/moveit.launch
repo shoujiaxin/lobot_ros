@@ -29,8 +29,8 @@
   </node>
   <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" /> -->
 
-  <!-- Run the custom hardware_interface -->
-  <node name="xarm_driver" pkg="lobot_driver" type="xarm" />
+  <!-- Run the robot driver -->
+  <node name="xarm_driver" pkg="lobot_driver" type="xarm_driver" />
 
   <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
   <include file="$(find lobot_moveit_config)/launch/move_group.launch">

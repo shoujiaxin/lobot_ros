@@ -6,10 +6,7 @@
     <transmission name="trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${joint_name}">
-        <!-- For simulating in Gazebo -->
-        <!-- <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> -->
-        <!-- For real robot -->
-        <hardwareInterface>hardware_interface/XArmDriver</hardwareInterface>
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       </joint>
       <actuator name="motor">
         <mechanicalReduction>1</mechanicalReduction>
