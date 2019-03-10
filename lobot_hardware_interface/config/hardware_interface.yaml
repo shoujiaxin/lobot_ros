@@ -1,0 +1,9 @@
+xarm:
+  hardware_interface:
+    joints:
+      - arm_joint1
+      - arm_joint2
+      - arm_joint3
+      - arm_joint4
+      - arm_joint5
+      - gripper_joint1
