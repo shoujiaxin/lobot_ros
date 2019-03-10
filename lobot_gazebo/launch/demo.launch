@@ -9,7 +9,10 @@
   <include file="$(find lobot_gazebo)/launch/xarm_world.launch" />
 
   <!-- Load controllers -->
-  <include file="$(find lobot_control)/launch/xarm_trajectory_control.launch" />
+  <rosparam file="$(find lobot_gazebo)/config/controllers.yaml" command="load" />
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+      output = "screen" ns="/xarm"
+      args="joint_state_controller arm_position_controller" />
 
   <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
   <include file="$(find lobot_moveit_config)/launch/planning_context.launch">
