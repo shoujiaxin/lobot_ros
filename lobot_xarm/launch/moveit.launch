@@ -9,7 +9,7 @@
   <param name="robot_description" command="$(find xacro)/xacro $(find lobot_description)/urdf/xarm.urdf.xacro" />
 
   <!-- Load controllers -->
-  <include file="$(find lobot_control)/launch/xarm_trajectory_control.launch" />
+  <include file="$(find lobot_hardware_interface)/launch/xarm_controllers.launch" />
 
   <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
   <include file="$(find lobot_moveit_config)/launch/planning_context.launch">
@@ -28,9 +28,6 @@
     <remap from="/joint_states" to="/xarm/joint_states" />
   </node>
   <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" /> -->
-
-  <!-- Run the robot driver -->
-  <node name="xarm_driver" pkg="lobot_driver" type="xarm_driver" />
 
   <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
   <include file="$(find lobot_moveit_config)/launch/move_group.launch">

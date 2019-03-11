@@ -17,3 +17,7 @@ xarm:
       arm_joint3: {p: 100.0, i: 0.0, d: 0.1, i_clamp: 0.0}
       arm_joint4: {p: 100.0, i: 0.0, d: 0.1, i_clamp: 0.0}
       arm_joint5: {p: 100.0, i: 0.0, d: 0.1, i_clamp: 0.0}
+
+  gripper_controller:
+    type: position_controllers/JointPositionController
+    joint: gripper_joint1

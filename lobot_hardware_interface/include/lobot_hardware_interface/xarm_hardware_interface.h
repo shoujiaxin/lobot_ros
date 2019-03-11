@@ -16,10 +16,10 @@ namespace lobot_hardware_interface {
 
 class XArmHardwareInterface : public hardware_interface::RobotHW {
  public:
-  XArmHardwareInterface();
+  XArmHardwareInterface(ros::NodeHandle& nh);
   ~XArmHardwareInterface();
 
-  void Update();
+  void Update(const ros::TimerEvent& e);
 
  private:
   ros::NodeHandle nh_;
@@ -28,7 +28,7 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   hardware_interface::JointStateInterface jointStateInterface_;
   hardware_interface::PositionJointInterface positionJointInterface_;
 
-  boost::shared_ptr<controller_manager::ControllerManager> controllerManager_;
+  controller_manager::ControllerManager controllerManager_;
 
   // Shared memory
   std::array<double, JOINT_NUM> jointPosition_;
@@ -38,6 +38,8 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
 
   // Driver
   XArmDriver xArmDriver_;
+
+  ros::Timer timer;
 
   void Read();
   void Write();
@@ -53,8 +55,12 @@ inline void lobot_hardware_interface::XArmHardwareInterface::Read() {
 // Send commands to control board
 inline void lobot_hardware_interface::XArmHardwareInterface::Write() {}
 
-inline void lobot_hardware_interface::XArmHardwareInterface::Update() {
+inline void lobot_hardware_interface::XArmHardwareInterface::Update(
+    const ros::TimerEvent& e) {
+  auto period = ros::Duration(e.current_real - e.last_real);
   Read();
+  controllerManager_.update(ros::Time::now(), period);
+  Write();
 }
 
 #endif  // XARM_HARDWARE_INTERFACE_H

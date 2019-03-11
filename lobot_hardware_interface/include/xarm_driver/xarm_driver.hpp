@@ -67,7 +67,8 @@ lobot_hardware_interface::XArmDriver::GetAngle() {
     while (i != SERVO_NUM) {
       double currPos = static_cast<double>(recvDataVecPtr->at(3 * i + 3)) +
                        static_cast<double>(recvDataVecPtr->at(3 * i + 4) << 8);
-      *currAngle = (currPos - 500) * PI / 750;
+      *currAngle = (i == 2 || i == 3) ? ((500 - currPos) * PI / 750)
+                                      : ((currPos - 500) * PI / 750);
       --currAngle;
       ++i;
     }
