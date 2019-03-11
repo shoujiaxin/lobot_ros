@@ -12,7 +12,7 @@
 
 #define PI 3.1415926
 
-#define SERVO_NUM 6
+#define JOINT_NUM 6
 
 #define CMD_MULT_SERVO_SPIN 3
 #define CMD_MULT_SERVO_POS_READ 21
@@ -23,8 +23,7 @@ class XArmDriver {
  public:
   XArmDriver();
   ~XArmDriver();
-  std::shared_ptr<std::array<double, SERVO_NUM - 1>> GetAngle();
-  std::shared_ptr<std::array<int, SERVO_NUM>> GetPos();
+  std::shared_ptr<std::array<double, JOINT_NUM>> GetJointState();
   void Init();
   void SpinServos(const std::initializer_list<unsigned>& idList,
                   const std::initializer_list<int>& posList,
@@ -32,6 +31,10 @@ class XArmDriver {
 
  private:
   MyHid myHid_;
+
+  std::array<int, JOINT_NUM> currPosArray;
+
+  void GetCurrentPosition();
 };
 
 }  // namespace lobot_hardware_interface
@@ -52,41 +55,32 @@ lobot_hardware_interface::XArmDriver::XArmDriver() {
 
 lobot_hardware_interface::XArmDriver::~XArmDriver() { myHid_.Close(); }
 
-inline std::shared_ptr<std::array<double, SERVO_NUM - 1>>
-lobot_hardware_interface::XArmDriver::GetAngle() {
-  std::array<double, SERVO_NUM - 1> currAngleArray;
+inline std::shared_ptr<std::array<double, JOINT_NUM>>
+lobot_hardware_interface::XArmDriver::GetJointState() {
+  std::array<double, JOINT_NUM> currAngleArray;
 
-  myHid_.MakeAndSendCmd(CMD_MULT_SERVO_POS_READ, {SERVO_NUM, 1, 2, 3, 4, 5, 6});
-  auto recvDataVecPtr = myHid_.Read(21);
+  GetCurrentPosition();
 
-  if (recvDataVecPtr->size() != 0 &&
-      recvDataVecPtr->at(0) == CMD_MULT_SERVO_POS_READ &&
-      recvDataVecPtr->at(1) == SERVO_NUM) {
-    auto currAngle = currAngleArray.end() - 1;
-    decltype(recvDataVecPtr->size()) i = 1;  // Skip the gripper joint
-    while (i != SERVO_NUM) {
-      double currPos = static_cast<double>(recvDataVecPtr->at(3 * i + 3)) +
-                       static_cast<double>(recvDataVecPtr->at(3 * i + 4) << 8);
-      *currAngle = (i == 2 || i == 3) ? ((500 - currPos) * PI / 750)
-                                      : ((currPos - 500) * PI / 750);
-      --currAngle;
-      ++i;
-    }
+  // State of arm joints
+  for (std::size_t i = 1; i != JOINT_NUM; ++i) {
+    currAngleArray.at(JOINT_NUM - 1 - i) =
+        (i == 2 || i == 3) ? ((500 - currPosArray.at(i)) * PI / 750)
+                           : ((currPosArray.at(i) - 500) * PI / 750);
   }
 
-  return std::make_shared<std::array<double, SERVO_NUM - 1>>(currAngleArray);
+  // State of the gripper joint, need to be mapped from angle to distance
+  currAngleArray.at(5) = 0;
+
+  return std::make_shared<std::array<double, JOINT_NUM>>(currAngleArray);
 }
 
-inline std::shared_ptr<std::array<int, SERVO_NUM>>
-lobot_hardware_interface::XArmDriver::GetPos() {
-  std::array<int, SERVO_NUM> currPosArray;
-
-  myHid_.MakeAndSendCmd(CMD_MULT_SERVO_POS_READ, {SERVO_NUM, 1, 2, 3, 4, 5, 6});
+inline void lobot_hardware_interface::XArmDriver::GetCurrentPosition() {
+  myHid_.MakeAndSendCmd(CMD_MULT_SERVO_POS_READ, {JOINT_NUM, 1, 2, 3, 4, 5, 6});
   auto recvDataVecPtr = myHid_.Read(21);
 
   if (recvDataVecPtr->size() != 0 &&
       recvDataVecPtr->at(0) == CMD_MULT_SERVO_POS_READ &&
-      recvDataVecPtr->at(1) == SERVO_NUM) {
+      recvDataVecPtr->at(1) == JOINT_NUM) {
     auto currPos = currPosArray.begin();
     decltype(recvDataVecPtr->size()) i = 0;
     while (currPos != currPosArray.end()) {
@@ -96,8 +90,6 @@ lobot_hardware_interface::XArmDriver::GetPos() {
       ++i;
     }
   }
-
-  return std::make_shared<std::array<int, SERVO_NUM>>(currPosArray);
 }
 
 void lobot_hardware_interface::XArmDriver::Init() {

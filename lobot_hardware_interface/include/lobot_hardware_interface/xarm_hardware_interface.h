@@ -10,8 +10,6 @@
 
 #include "xarm_driver/xarm_driver.hpp"
 
-#define JOINT_NUM 5
-
 namespace lobot_hardware_interface {
 
 class XArmHardwareInterface : public hardware_interface::RobotHW {
@@ -31,10 +29,10 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   controller_manager::ControllerManager controllerManager_;
 
   // Shared memory
-  std::array<double, JOINT_NUM> jointPosition_;
-  std::array<double, JOINT_NUM> jointVelocity_;
-  std::array<double, JOINT_NUM> jointEffort_;
-  std::array<double, JOINT_NUM> jointPositionCmd_;
+  std::array<double, JOINT_NUM> jointPosition_{0};
+  std::array<double, JOINT_NUM> jointVelocity_{0};
+  std::array<double, JOINT_NUM> jointEffort_{0};
+  std::array<double, JOINT_NUM> jointPositionCmd_{0};
 
   // Driver
   XArmDriver xArmDriver_;
@@ -49,7 +47,7 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
 
 // Get joints' current angles
 inline void lobot_hardware_interface::XArmHardwareInterface::Read() {
-  jointPosition_ = *xArmDriver_.GetAngle();
+  jointPosition_ = *xArmDriver_.GetJointState();
 }
 
 // Send commands to control board

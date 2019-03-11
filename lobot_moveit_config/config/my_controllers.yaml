@@ -10,3 +10,9 @@ controller_list:
       - arm_joint4
       - arm_joint5
       - gripper_joint1
+
+  - name: xarm/gripper_controller
+    action_ns: gripper_cmd
+    type: GripperCommand
+    joint:
+      - gripper_joint1

@@ -9,7 +9,8 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
     : nh_(nh), controllerManager_(this) {
   // Names of arm joints
   const std::array<std::string, JOINT_NUM> jointName{
-      "arm_joint1", "arm_joint2", "arm_joint3", "arm_joint4", "arm_joint5"};
+      "arm_joint1", "arm_joint2", "arm_joint3",
+      "arm_joint4", "arm_joint5", "gripper_joint1"};
 
   for (int i = 0; i != JOINT_NUM; ++i) {
     // Connect and register the joint state interface
@@ -26,9 +27,6 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
 
   registerInterface(&jointStateInterface_);
   registerInterface(&positionJointInterface_);
-
-  // controllerManager_.reset(
-  //     new controller_manager::ControllerManager(this, nh_));
 
   timer = nh.createTimer(
       ros::Duration(0.1),
