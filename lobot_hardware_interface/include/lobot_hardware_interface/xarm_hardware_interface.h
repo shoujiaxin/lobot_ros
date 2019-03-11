@@ -45,12 +45,16 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
 
 }  // namespace lobot_hardware_interface
 
-// Get joints' current position
-inline void lobot_hardware_interface::XArmHardwareInterface::Read() {}
+// Get joints' current angles
+inline void lobot_hardware_interface::XArmHardwareInterface::Read() {
+  jointPosition_ = *xArmDriver_.GetAngle();
+}
 
 // Send commands to control board
 inline void lobot_hardware_interface::XArmHardwareInterface::Write() {}
 
-inline void lobot_hardware_interface::XArmHardwareInterface::Update() {}
+inline void lobot_hardware_interface::XArmHardwareInterface::Update() {
+  Read();
+}
 
 #endif  // XARM_HARDWARE_INTERFACE_H

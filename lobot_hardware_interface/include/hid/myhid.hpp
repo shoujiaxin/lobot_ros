@@ -2,10 +2,10 @@
 #define MYHID_H
 
 #include <initializer_list>
-#include <iostream>
+#include <memory>
 #include <stdexcept>
-#include <string>
 #include <vector>
+
 #include "hid/hidapi.h"
 
 #define FRAME_HEADER 0x55
@@ -16,7 +16,7 @@ class MyHid {
   MyHid(const unsigned short vi, const unsigned short pi)
       : vendorId(vi), productId(pi) {}
 
-  void Close() { hid_close(myDevice); }
+  void Close();
   unsigned short GetProductId() const { return productId; }
   unsigned short GetVendorId() const { return vendorId; }
   bool IsConnected() const { return connected; }
@@ -24,8 +24,8 @@ class MyHid {
   int MakeAndSendCmd(const unsigned cmd,
                      const std::initializer_list<unsigned> &argv);
   int MakeAndSendCmd(const unsigned cmd, const std::vector<unsigned> &argv);
-  std::vector<unsigned> Read(const size_t length);
-  int Open();
+  void Open();
+  std::shared_ptr<std::vector<unsigned>> Read(const size_t length);
   void SetProductId(const unsigned short pi) { productId = pi; }
   void SetVendorId(const unsigned short vi) { vendorId = vi; }
 
@@ -36,22 +36,11 @@ class MyHid {
   hid_device *myDevice = nullptr;
 };
 
-inline int MyHid::Open() {
-  try {
-    if (hid_init()) {
-      throw std::runtime_error("HID initialization failed!");
-    }
-
-    myDevice = hid_open(vendorId, productId, nullptr);
-    if (!myDevice) {
-      throw std::runtime_error("Cannot open HID device!");
-    }
-  } catch (std::runtime_error err) {
-    std::cerr << err.what() << std::endl;
-    return -1;
+inline void MyHid::Close() {
+  if (connected) {
+    hid_close(myDevice);
+    hid_exit();
   }
-  connected = true;
-  return 0;
 }
 
 inline int MyHid::MakeAndSendCmd(const unsigned cmd) {
@@ -117,11 +106,22 @@ inline int MyHid::MakeAndSendCmd(const unsigned cmd,
   return -1;
 }
 
-inline std::vector<unsigned> MyHid::Read(const size_t length) {
+inline void MyHid::Open() {
+  hid_init();
+
+  myDevice = hid_open(vendorId, productId, nullptr);
+  if (!myDevice) {
+    throw std::runtime_error("Cannot open HID device!");
+  }
+
+  connected = true;
+}
+
+inline std::shared_ptr<std::vector<unsigned>> MyHid::Read(const size_t length) {
   std::vector<unsigned> data;
   data.reserve(length);
   if (length > 256) {
-    return data;
+    return std::make_shared<std::vector<unsigned>>(data);
   }
   unsigned char recvBuff[256] = {0};
 
@@ -134,7 +134,7 @@ inline std::vector<unsigned> MyHid::Read(const size_t length) {
       ++i;
     }
   }
-  return data;
+  return std::make_shared<std::vector<unsigned>>(data);
 }
 
 #endif  // MYHID_H
