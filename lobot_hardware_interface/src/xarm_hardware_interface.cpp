@@ -15,13 +15,12 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
   for (int i = 0; i != JOINT_NUM; ++i) {
     // Connect and register the joint state interface
     hardware_interface::JointStateHandle jointStateHandle(
-        jointName.at(i), &jointPosition_.at(i), &jointVelocity_.at(i),
-        &jointEffort_.at(i));
+        jointName[i], &jointPosition_[i], &jointVelocity_[i], &jointEffort_[i]);
     jointStateInterface_.registerHandle(jointStateHandle);
 
     // Connect and register the joint position interface
     hardware_interface::JointHandle jointPosHandle(jointStateHandle,
-                                                   &jointPositionCmd_.at(i));
+                                                   &jointPositionCmd_[i]);
     positionJointInterface_.registerHandle(jointPosHandle);
   }
 

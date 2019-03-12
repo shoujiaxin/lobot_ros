@@ -23,6 +23,7 @@ class XArmDriver {
  public:
   XArmDriver();
   ~XArmDriver();
+  void Execution(const std::array<double, JOINT_NUM>& cmd);
   std::shared_ptr<std::array<double, JOINT_NUM>> GetJointState();
   void Init();
   void SpinServos(const std::initializer_list<unsigned>& idList,
@@ -55,21 +56,41 @@ lobot_hardware_interface::XArmDriver::XArmDriver() {
 
 lobot_hardware_interface::XArmDriver::~XArmDriver() { myHid_.Close(); }
 
+inline void lobot_hardware_interface::XArmDriver::Execution(
+    const std::array<double, JOINT_NUM>& cmd) {
+  std::array<int, JOINT_NUM> posCmdArray;
+
+  // Commands for arm joints, convert radians to positions
+  for (std::size_t i = 0; i != JOINT_NUM - 1; ++i) {
+    posCmdArray[i] = (i == 2 || i == 3) ? (500 - 750 * cmd[i] / PI)
+                                        : (500 + 750 * cmd[i] / PI);
+  }
+
+  // Command for gripper joint
+  posCmdArray[JOINT_NUM - 1] = 500;
+
+  // Send commands
+  SpinServos({1, 2, 3, 4, 5, 6},
+             {posCmdArray[5], posCmdArray[4], posCmdArray[3], posCmdArray[2],
+              posCmdArray[1], posCmdArray[0]},
+             50);
+}
+
 inline std::shared_ptr<std::array<double, JOINT_NUM>>
 lobot_hardware_interface::XArmDriver::GetJointState() {
   std::array<double, JOINT_NUM> currAngleArray;
 
   GetCurrentPosition();
 
-  // State of arm joints
+  // State of arm joints, convert positions to radians
   for (std::size_t i = 1; i != JOINT_NUM; ++i) {
-    currAngleArray.at(JOINT_NUM - 1 - i) =
-        (i == 2 || i == 3) ? ((500 - currPosArray.at(i)) * PI / 750)
-                           : ((currPosArray.at(i) - 500) * PI / 750);
+    currAngleArray[JOINT_NUM - 1 - i] =
+        (i == 2 || i == 3) ? ((500 - currPosArray[i]) * PI / 750)
+                           : ((currPosArray[i] - 500) * PI / 750);
   }
 
   // State of the gripper joint, need to be mapped from angle to distance
-  currAngleArray.at(5) = 0;
+  currAngleArray[5] = 0;
 
   return std::make_shared<std::array<double, JOINT_NUM>>(currAngleArray);
 }

@@ -51,7 +51,9 @@ inline void lobot_hardware_interface::XArmHardwareInterface::Read() {
 }
 
 // Send commands to control board
-inline void lobot_hardware_interface::XArmHardwareInterface::Write() {}
+inline void lobot_hardware_interface::XArmHardwareInterface::Write() {
+  xArmDriver_.Execution(jointPositionCmd_);
+}
 
 inline void lobot_hardware_interface::XArmHardwareInterface::Update(
     const ros::TimerEvent& e) {
