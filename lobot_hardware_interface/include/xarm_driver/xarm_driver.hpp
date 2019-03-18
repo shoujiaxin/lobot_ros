@@ -23,7 +23,8 @@ class XArmDriver {
  public:
   XArmDriver();
   ~XArmDriver();
-  void Execution(const std::array<double, JOINT_NUM>& cmd);
+  void Execute(const std::array<double, JOINT_NUM>& cmd,
+               const ros::Duration& period);
   std::shared_ptr<std::array<double, JOINT_NUM>> GetJointState();
   void Init();
   void SpinServos(const std::initializer_list<unsigned>& idList,
@@ -56,8 +57,8 @@ lobot_hardware_interface::XArmDriver::XArmDriver() {
 
 lobot_hardware_interface::XArmDriver::~XArmDriver() { myHid_.Close(); }
 
-inline void lobot_hardware_interface::XArmDriver::Execution(
-    const std::array<double, JOINT_NUM>& cmd) {
+inline void lobot_hardware_interface::XArmDriver::Execute(
+    const std::array<double, JOINT_NUM>& cmd, const ros::Duration& period) {
   std::array<int, JOINT_NUM> posCmdArray;
 
   // Commands for arm joints, convert radians to positions
@@ -73,7 +74,7 @@ inline void lobot_hardware_interface::XArmDriver::Execution(
   SpinServos({1, 2, 3, 4, 5, 6},
              {posCmdArray[5], posCmdArray[4], posCmdArray[3], posCmdArray[2],
               posCmdArray[1], posCmdArray[0]},
-             50);
+             period.toSec() * 1000);
 }
 
 inline std::shared_ptr<std::array<double, JOINT_NUM>>

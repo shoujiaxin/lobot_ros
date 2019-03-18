@@ -17,7 +17,9 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   XArmHardwareInterface(ros::NodeHandle& nh);
   ~XArmHardwareInterface();
 
-  void Update(const ros::TimerEvent& e);
+  void read(const ros::Time& time, const ros::Duration& period);
+  void update(const ros::TimerEvent& e);
+  void write(const ros::Time& time, const ros::Duration& period);
 
  private:
   ros::NodeHandle nh_;
@@ -38,29 +40,30 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   XArmDriver xArmDriver_;
 
   ros::Timer timer;
-
-  void Read();
-  void Write();
 };
 
 }  // namespace lobot_hardware_interface
 
 // Get joints' current angles
-inline void lobot_hardware_interface::XArmHardwareInterface::Read() {
+inline void lobot_hardware_interface::XArmHardwareInterface::read(
+    const ros::Time& time, const ros::Duration& period) {
   jointPosition_ = *xArmDriver_.GetJointState();
 }
 
-// Send commands to control board
-inline void lobot_hardware_interface::XArmHardwareInterface::Write() {
-  xArmDriver_.Execution(jointPositionCmd_);
+inline void lobot_hardware_interface::XArmHardwareInterface::update(
+    const ros::TimerEvent& e) {
+  auto currTime = ros::Time::now();
+  auto period = ros::Duration(e.current_real - e.last_real);
+
+  read(currTime, period);
+  controllerManager_.update(currTime, period);
+  write(currTime, period);
 }
 
-inline void lobot_hardware_interface::XArmHardwareInterface::Update(
-    const ros::TimerEvent& e) {
-  auto period = ros::Duration(e.current_real - e.last_real);
-  Read();
-  controllerManager_.update(ros::Time::now(), period);
-  Write();
+// Send commands to control board
+inline void lobot_hardware_interface::XArmHardwareInterface::write(
+    const ros::Time& time, const ros::Duration& period) {
+  xArmDriver_.Execute(jointPositionCmd_, period);
 }
 
 #endif  // XARM_HARDWARE_INTERFACE_H

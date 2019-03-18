@@ -29,7 +29,7 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
 
   timer = nh.createTimer(
       ros::Duration(0.1),
-      &lobot_hardware_interface::XArmHardwareInterface::Update, this);
+      &lobot_hardware_interface::XArmHardwareInterface::update, this);
 }
 
 XArmHardwareInterface::~XArmHardwareInterface() {}
