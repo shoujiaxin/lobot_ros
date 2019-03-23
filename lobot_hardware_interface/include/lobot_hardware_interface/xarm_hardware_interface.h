@@ -17,9 +17,9 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   XArmHardwareInterface(ros::NodeHandle& nh);
   ~XArmHardwareInterface();
 
-  void read(const ros::Time& time, const ros::Duration& period);
+  void read(const ros::Time& time, const ros::Duration& period) override;
   void update(const ros::TimerEvent& e);
-  void write(const ros::Time& time, const ros::Duration& period);
+  void write(const ros::Time& time, const ros::Duration& period) override;
 
  private:
   ros::NodeHandle nh_;
