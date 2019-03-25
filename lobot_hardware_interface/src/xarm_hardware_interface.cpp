@@ -8,11 +8,11 @@ using namespace lobot_hardware_interface;
 XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
     : nh_(nh), controllerManager_(this) {
   // Names of arm joints
-  const std::array<std::string, JOINT_NUM> jointName{
+  const std::array<std::string, SERVO_NUM> jointName{
       "arm_joint1", "arm_joint2", "arm_joint3",
       "arm_joint4", "arm_joint5", "gripper_joint1"};
 
-  for (int i = 0; i != JOINT_NUM; ++i) {
+  for (int i = 0; i != SERVO_NUM; ++i) {
     // Connect and register the joint state interface
     hardware_interface::JointStateHandle jointStateHandle(
         jointName[i], &jointPosition_[i], &jointVelocity_[i], &jointEffort_[i]);

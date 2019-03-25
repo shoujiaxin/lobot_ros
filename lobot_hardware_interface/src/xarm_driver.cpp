@@ -1,0 +1,25 @@
+#include "xarm_driver/xarm_driver.h"
+
+using namespace lobot_hardware_interface;
+
+XArmDriver::XArmDriver() {
+  myHid_ = MyHid(0x0483, 0x5750);
+  try {
+    myHid_.Open();
+  } catch (std::runtime_error err) {
+    ROS_ERROR(err.what());
+    ros::shutdown();
+  }
+
+  ROS_INFO("xArm control board connected!");
+
+  Init();
+}
+
+XArmDriver::~XArmDriver() { myHid_.Close(); }
+
+void XArmDriver::Init() {
+  SpinServos({1, 2, 3, 4, 5, 6}, {200, 500, 500, 500, 500, 500});
+  ros::Duration(2).sleep();
+  ROS_INFO("Arm joints initialized!");
+}

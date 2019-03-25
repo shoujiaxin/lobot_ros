@@ -8,7 +8,7 @@
 #include <ros/ros.h>
 #include <array>
 
-#include "xarm_driver/xarm_driver.hpp"
+#include "xarm_driver/xarm_driver.h"
 
 namespace lobot_hardware_interface {
 
@@ -31,10 +31,10 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   controller_manager::ControllerManager controllerManager_;
 
   // Shared memory
-  std::array<double, JOINT_NUM> jointPosition_{0};
-  std::array<double, JOINT_NUM> jointVelocity_{0};
-  std::array<double, JOINT_NUM> jointEffort_{0};
-  std::array<double, JOINT_NUM> jointPositionCmd_{0};
+  std::array<double, SERVO_NUM> jointPosition_{0};
+  std::array<double, SERVO_NUM> jointVelocity_{0};
+  std::array<double, SERVO_NUM> jointEffort_{0};
+  std::array<double, SERVO_NUM> jointPositionCmd_{0};
 
   // Driver
   XArmDriver xArmDriver_;
@@ -42,16 +42,13 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   ros::Timer timer;
 };
 
-}  // namespace lobot_hardware_interface
-
 // Get joints' current angles
-inline void lobot_hardware_interface::XArmHardwareInterface::read(
-    const ros::Time& time, const ros::Duration& period) {
+inline void XArmHardwareInterface::read(const ros::Time& time,
+                                        const ros::Duration& period) {
   jointPosition_ = *xArmDriver_.GetJointState();
 }
 
-inline void lobot_hardware_interface::XArmHardwareInterface::update(
-    const ros::TimerEvent& e) {
+inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
   auto currTime = ros::Time::now();
   auto period = ros::Duration(e.current_real - e.last_real);
 
@@ -61,9 +58,11 @@ inline void lobot_hardware_interface::XArmHardwareInterface::update(
 }
 
 // Send commands to control board
-inline void lobot_hardware_interface::XArmHardwareInterface::write(
-    const ros::Time& time, const ros::Duration& period) {
+inline void XArmHardwareInterface::write(const ros::Time& time,
+                                         const ros::Duration& period) {
   xArmDriver_.Execute(jointPositionCmd_, period);
 }
+
+}  // namespace lobot_hardware_interface
 
 #endif  // XARM_HARDWARE_INTERFACE_H
