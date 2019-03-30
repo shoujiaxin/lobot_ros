@@ -69,7 +69,7 @@
     <geometry>
       <box size="${arm_link4_length} ${arm_link4_width} ${arm_link4_height}" />
     </geometry>
-    <origin rpy="0 0 0" xyz="0 0 ${arm_link4_height/2}" />
+    <origin xyz="0 0 ${arm_link4_height/2}" rpy="0 0 0" />
   </xacro:property>
 
   <!-- arm_link5 properties -->
@@ -269,7 +269,7 @@
     </xacro:box_inertial_matrix>
   </link>
   <joint name="gripper_joint1" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 ${-gripper_link_width/2} 0" />
+    <origin rpy="0 0 0" xyz="0 ${-gripper_link_width/2} ${gripper_link_height}" />
     <parent link="gripper_link" />
     <child link="left_gripper" />
     <axis xyz="0 1 0" />
@@ -291,7 +291,7 @@
     </xacro:box_inertial_matrix>
   </link>
   <joint name="gripper_joint2" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 ${gripper_link_width/2} 0" />
+    <origin rpy="0 0 0" xyz="0 ${gripper_link_width/2} ${gripper_link_height}" />
     <parent link="gripper_link" />
     <child link="right_gripper" />
     <axis xyz="0 1 0" />
