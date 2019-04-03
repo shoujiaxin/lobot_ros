@@ -1,0 +1,5 @@
+<launch>
+
+  <node name="xarm_move_group_interface" pkg="lobot_demo" type="xarm_move_group_interface" respawn="false" output="screen" />
+
+</launch>
