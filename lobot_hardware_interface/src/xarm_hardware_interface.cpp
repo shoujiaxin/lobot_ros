@@ -3,7 +3,7 @@
 
 #include "lobot_hardware_interface/xarm_hardware_interface.h"
 
-using namespace lobot_hardware_interface;
+namespace lobot_hardware_interface {
 
 XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
     : nh_(nh), controllerManager_(this) {
@@ -34,11 +34,13 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
 
 XArmHardwareInterface::~XArmHardwareInterface() {}
 
+}  // namespace lobot_hardware_interface
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "xarm_hardware_interface");
   ros::NodeHandle nh;
   ros::AsyncSpinner spinner(2);
-  XArmHardwareInterface xArm(nh);
+  lobot_hardware_interface::XArmHardwareInterface xArm(nh);
   spinner.start();
   ros::waitForShutdown();
 

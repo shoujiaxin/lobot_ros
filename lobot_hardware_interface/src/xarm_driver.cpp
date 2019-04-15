@@ -1,6 +1,6 @@
 #include "xarm_driver/xarm_driver.h"
 
-using namespace lobot_hardware_interface;
+namespace lobot_hardware_interface {
 
 XArmDriver::XArmDriver() {
   myHid_ = MyHid(0x0483, 0x5750);
@@ -23,3 +23,5 @@ void XArmDriver::Init() {
   ros::Duration(2).sleep();
   ROS_INFO_NAMED("xarm_hardware_interface", "Arm joints initialized!");
 }
+
+}  // namespace lobot_hardware_interface

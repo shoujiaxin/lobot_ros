@@ -10,6 +10,8 @@
 
 #include "hid/myhid.hpp"
 
+namespace lobot_hardware_interface {
+
 #define PI 3.1415926
 
 #define SERVO_NUM 6
@@ -17,8 +19,6 @@
 
 #define CMD_MULT_SERVO_SPIN 3
 #define CMD_MULT_SERVO_POS_READ 21
-
-namespace lobot_hardware_interface {
 
 class XArmDriver {
  public:
