@@ -30,8 +30,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_library(hidapi src/hid.c)
-target_link_libraries(hidapi udev)
-
-rosbuild_add_executable(xarm_hardware_interface src/xarm_driver.cpp src/xarm_hardware_interface.cpp)
-target_link_libraries(xarm_hardware_interface boost_system hidapi)
+rosbuild_add_executable(xarm_move_group_demo src/xarm_move_group_demo.cpp)
+target_link_libraries(xarm_move_group_demo boost_system)
