@@ -4,13 +4,18 @@
 
 namespace lobot_ik {
 
-bool XArmIk::SetTargetValue(
-    XArmPose pose, moveit::planning_interface::MoveGroupInterface& group) {
-  if (!pose.IsReachable()) {
-    pose.ReviseY();
+bool XArmIk::SetPoseTarget(
+    const geometry_msgs::Pose& p,
+    moveit::planning_interface::MoveGroupInterface& group) {
+  auto pose = p;  // Make a copy of the pose
+  if (!IsPoseReachable(pose) && !RevisePose(pose)) {
+    return false;
   }
 
-  if (!SolveIk(pose.GetPositionVector(), pose.GetRotateMatrix())) {
+  tf::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z,
+                   pose.orientation.w);
+  tf::Matrix3x3 rotateMatrix(q);
+  if (!SolveIk(pose.position, rotateMatrix)) {
     return false;
   }
 
@@ -27,7 +32,7 @@ bool XArmIk::SetTargetValue(
   return true;
 }
 
-bool XArmIk::SolveIk(const PosVec& p, const RotMat& r) {
+bool XArmIk::SolveIk(const geometry_msgs::Point& p, const tf::Matrix3x3& r) {
   constexpr double a1 = 0.003;
   constexpr double a2 = 0.096;
   constexpr double a3 = 0.096;
@@ -37,9 +42,9 @@ bool XArmIk::SolveIk(const PosVec& p, const RotMat& r) {
   const double nx = r[0][2], ny = r[1][2], nz = r[2][2];
   const double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
   const double ax = r[0][0], ay = r[1][0], az = r[2][0];
-  const double px = p[0] - toolLength * r[0][0];
-  const double py = p[1] - toolLength * r[1][0];
-  const double pz = p[2] - toolLength * r[2][0] - baseHeight;
+  const double px = p.x - toolLength * r[0][0];
+  const double py = p.y - toolLength * r[1][0];
+  const double pz = p.z - toolLength * r[2][0] - baseHeight;
 
   std::complex<double> theta3 =
       2 * atan(sqrt(
@@ -290,18 +295,33 @@ bool XArmIk::SolveIk(const PosVec& p, const RotMat& r) {
                pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)));
 
   // Check joints' limit
-  if (t1 < -2 * PI / 3 || t1 > 2 * PI / 3 || t2 < -PI || t2 > 0 || t3 < -2 ||
-      t3 > 2 || t4 < -2 || t4 > 2 || t5 < -2 * PI / 3 || t5 > 2 * PI / 3) {
+  if (t1 < -2 * M_PI / 3 || t1 > 2 * M_PI / 3 || t2 < -M_PI || t2 > 0 ||
+      t3 < -2 || t3 > 2 || t4 < -2 || t4 > 2 || t5 < -2 * M_PI / 3 ||
+      t5 > 2 * M_PI / 3) {
     return false;
   }
 
   jointValueVec_[0] = t1;
-  jointValueVec_[1] = t2 + PI / 2;
+  jointValueVec_[1] = t2 + M_PI / 2;
   jointValueVec_[2] = t3;
   jointValueVec_[3] = t4;
   jointValueVec_[4] = t5;
 
   return true;
+}
+
+bool XArmIk::RevisePose(geometry_msgs::Pose& pose) {
+  tf::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z,
+                   pose.orientation.w);
+  tf::Matrix3x3 rotateMatrix(q);
+  double roll, pitch, yaw;
+  rotateMatrix.getRPY(roll, pitch, yaw);
+
+  if (pose.position.x != 0) {
+    pose.position.y = pose.position.x * tan(yaw);
+  }
+
+  return IsPoseReachable(pose);
 }
 
 }  // namespace lobot_ik

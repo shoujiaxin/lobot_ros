@@ -11,44 +11,40 @@ int main(int argc, char** argv) {
 
   spinner.start();
 
-  static const std::string PLANNING_GROUP = "xarm_arm";
-  moveit::planning_interface::MoveGroupInterface moveGroup(PLANNING_GROUP);
-  lobot_ik::XArmIk xArmIk;
-  moveit::planning_interface::MoveGroupInterface::Plan myPlan;
-
   moveit_visual_tools::MoveItVisualTools visualTools("bask_link");
-
-  // Print the names of reference frame and end-effector link
-  ROS_INFO_NAMED("xarm_move_group_interface", "Planning frame: %s",
+  moveit::planning_interface::MoveGroupInterface moveGroup("xarm_arm");
+  moveit::planning_interface::MoveGroupInterface::Plan myPlan;
+  ROS_INFO_NAMED("xarm_move_group_demo", "Planning frame: %s",
                  moveGroup.getPlanningFrame().c_str());
-  ROS_INFO_NAMED("xarm_move_group_interface", "End effector link: %s",
+  ROS_INFO_NAMED("xarm_move_group_demo", "End effector link: %s",
                  moveGroup.getEndEffectorLink().c_str());
-  // Print list of all groups
-  ROS_INFO_NAMED("xarm_move_group_interface", "Available Planning Groups:");
-  std::copy(moveGroup.getJointModelGroupNames().begin(),
-            moveGroup.getJointModelGroupNames().end(),
-            std::ostream_iterator<std::string>(std::cout, "\n"));
 
+  lobot_ik::XArmIk xArmIk;
+
+  // Plan
   visualTools.prompt(
       "Press 'next' in the RvizVisualToolsGui to start plan to target pose 1");
-  lobot_ik::XArmPose targetPose1(
-      {0.07, 0, 0.1},
-      {lobot_ik::XArmQuaternion::AngleType::RPY, 0, 3 * PI / 4, 0});
-  xArmIk.SetTargetValue(targetPose1, moveGroup);
-  // Print result
+  geometry_msgs::Pose targetPose1;
+  targetPose1.position.x = 0.04;
+  targetPose1.position.y = 0;
+  targetPose1.position.z = 0.1;
+  targetPose1.orientation =
+      tf::createQuaternionMsgFromRollPitchYaw(0, 3 * M_PI / 4, M_PI / 3);
+  xArmIk.SetPoseTarget(targetPose1, moveGroup);
   bool success = (moveGroup.plan(myPlan) ==
                   moveit::planning_interface::MoveItErrorCode::SUCCESS);
-  ROS_INFO_NAMED("xarm_move_group_interface",
-                 "Visualizing plan 1 (pose goal) %s", success ? "" : "FAILED");
-  ROS_INFO_NAMED("xarm_move_group_interface",
+  ROS_INFO_NAMED("xarm_move_group_demo", "Visualizing plan 1 (pose goal) %s",
+                 success ? "" : "FAILED");
+  ROS_INFO_NAMED("xarm_move_group_demo",
                  "Visualizing plan 1 as trajectory line");
 
+  // Move
   visualTools.prompt(
       "Press 'next' in the RvizVisualToolsGui to start move to target pose 1");
-  // Move to the goal
-  moveGroup.move();
-
-  ros::waitForShutdown();
+  if (success) {
+    ROS_INFO_NAMED("xarm_move_group_demo", "Moving...");
+    moveGroup.move();
+  }
 
   return 0;
 }

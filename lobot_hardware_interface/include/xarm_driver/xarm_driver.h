@@ -12,8 +12,6 @@
 
 namespace lobot_hardware_interface {
 
-#define PI 3.1415926
-
 #define SERVO_NUM 6
 #define JOINT_NUM 5
 
@@ -46,8 +44,8 @@ inline void XArmDriver::Execute(const std::array<double, SERVO_NUM>& cmd,
 
   // Commands for arm joints, convert radians to positions
   for (std::size_t i = 0; i != JOINT_NUM; ++i) {
-    posCmdArray[i] = (i == 2 || i == 3) ? (500 - 750 * cmd[i] / PI)
-                                        : (500 + 750 * cmd[i] / PI);
+    posCmdArray[i] = (i == 2 || i == 3) ? (500 - 750 * cmd[i] / M_PI)
+                                        : (500 + 750 * cmd[i] / M_PI);
   }
 
   // Command for gripper joint
@@ -68,9 +66,9 @@ XArmDriver::GetJointState() {
 
   // State of arm joints, convert positions to radians
   for (std::size_t i = 1; i != SERVO_NUM; ++i) {
-    currAngleArray[JOINT_NUM - i] = (i == 2 || i == 3)
-                                        ? ((500 - currPosArray_[i]) * PI / 750)
-                                        : ((currPosArray_[i] - 500) * PI / 750);
+    currAngleArray[JOINT_NUM - i] =
+        (i == 2 || i == 3) ? ((500 - currPosArray_[i]) * M_PI / 750)
+                           : ((currPosArray_[i] - 500) * M_PI / 750);
   }
 
   // State of the gripper joint, mapped from angle to distance
