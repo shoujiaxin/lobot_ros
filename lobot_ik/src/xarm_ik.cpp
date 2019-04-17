@@ -1,5 +1,7 @@
 #include "xarm_ik/xarm_ik.h"
 
+#include <iostream>
+
 namespace lobot_ik {
 
 bool XArmIk::SetTargetValue(
@@ -16,6 +18,7 @@ bool XArmIk::SetTargetValue(
   auto nameIt = jointNames.cbegin();
   auto valueIt = jointValueVec_.cbegin();
   while (nameIt != jointNames.cend()) {
+    std::cout << *nameIt << ": " << *valueIt << std::endl;
     group.setJointValueTarget(*nameIt, *valueIt);
     ++nameIt;
     ++valueIt;
@@ -25,11 +28,11 @@ bool XArmIk::SetTargetValue(
 }
 
 bool XArmIk::SolveIk(const PosVec& p, const RotMat& r) {
-  constexpr double a1 = 3;
-  constexpr double a2 = 96;
-  constexpr double a3 = 96;
-  constexpr double baseHeight = 72;   // Height of base relative to world
-  constexpr double toolLength = 100;  // Length of terminal tool
+  constexpr double a1 = 0.003;
+  constexpr double a2 = 0.096;
+  constexpr double a3 = 0.096;
+  constexpr double baseHeight = 0.072;  // Height of base relative to world
+  constexpr double toolLength = 0.1;    // Length of terminal tool
 
   const double nx = r[0][2], ny = r[1][2], nz = r[2][2];
   const double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
@@ -287,14 +290,13 @@ bool XArmIk::SolveIk(const PosVec& p, const RotMat& r) {
                pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)));
 
   // Check joints' limit
-  if (t1 < -2 * PI / 3 || t1 > 2 * PI / 3 || t2 < -PI / 2 || t2 > PI / 2 ||
-      t3 < -2 || t3 > 2 || t4 < -2 || t4 > 2 || t5 < -2 * PI / 3 ||
-      t5 > 2 * PI / 3) {
+  if (t1 < -2 * PI / 3 || t1 > 2 * PI / 3 || t2 < -PI || t2 > 0 || t3 < -2 ||
+      t3 > 2 || t4 < -2 || t4 > 2 || t5 < -2 * PI / 3 || t5 > 2 * PI / 3) {
     return false;
   }
 
   jointValueVec_[0] = t1;
-  jointValueVec_[1] = t2;
+  jointValueVec_[1] = t2 + PI / 2;
   jointValueVec_[2] = t3;
   jointValueVec_[3] = t4;
   jointValueVec_[4] = t5;

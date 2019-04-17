@@ -30,5 +30,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+rosbuild_add_library(xarm_ik src/xarm_ik.cpp)
 rosbuild_add_executable(xarm_move_group_demo src/xarm_move_group_demo.cpp)
-target_link_libraries(xarm_move_group_demo boost_system)
+target_link_libraries(xarm_move_group_demo boost_system xarm_ik)

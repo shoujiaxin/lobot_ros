@@ -11,6 +11,7 @@
   <depend package="std_msgs"/>
   <depend package="roscpp"/>
   <depend package="moveit_ros_planning_interface"/>
+  <depend package="moveit_visual_tools"/>
 
 </package>
 
