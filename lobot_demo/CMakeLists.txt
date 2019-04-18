@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.4.6)
+add_compile_options(-std=c++11)
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 # Set the build type.  Options are:
@@ -26,5 +27,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
+#rosbuild_add_executable(example examples/example.cpp)
+#target_link_libraries(example ${PROJECT_NAME})
+
 rosbuild_add_executable(xarm_move_group_interface src/xarm_move_group_interface.cpp)
 target_link_libraries(xarm_move_group_interface boost_system)

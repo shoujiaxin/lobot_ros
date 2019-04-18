@@ -26,10 +26,10 @@ int main(int argc, char** argv) {
       "Press 'next' in the RvizVisualToolsGui to start plan to target pose 1");
   geometry_msgs::Pose targetPose1;
   targetPose1.position.x = 0.04;
-  targetPose1.position.y = 0;
+  targetPose1.position.y = 0.05;
   targetPose1.position.z = 0.1;
   targetPose1.orientation =
-      tf::createQuaternionMsgFromRollPitchYaw(0, 3 * M_PI / 4, M_PI / 3);
+      tf::createQuaternionMsgFromRollPitchYaw(M_PI / 6, 3 * M_PI / 4, M_PI / 3);
   xArmIk.SetPoseTarget(targetPose1, moveGroup);
   bool success = (moveGroup.plan(myPlan) ==
                   moveit::planning_interface::MoveItErrorCode::SUCCESS);

@@ -37,7 +37,7 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, const tf::Matrix3x3& r) {
   constexpr double a2 = 0.096;
   constexpr double a3 = 0.096;
   constexpr double baseHeight = 0.072;  // Height of base relative to world
-  constexpr double toolLength = 0.1;    // Length of terminal tool
+  constexpr double toolLength = 0.12;   // Length of terminal tool
 
   const double nx = r[0][2], ny = r[1][2], nz = r[2][2];
   const double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
@@ -315,10 +315,12 @@ bool XArmIk::RevisePose(geometry_msgs::Pose& pose) {
                    pose.orientation.w);
   tf::Matrix3x3 rotateMatrix(q);
   double roll, pitch, yaw;
-  rotateMatrix.getRPY(roll, pitch, yaw);
+  rotateMatrix.getRPY(roll, pitch, yaw, 2);
 
   if (pose.position.x != 0) {
-    pose.position.y = pose.position.x * tan(yaw);
+    yaw = atan(pose.position.y / pose.position.x);
+    pose.orientation =
+        tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
   }
 
   return IsPoseReachable(pose);
