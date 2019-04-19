@@ -1,0 +1,7 @@
+<library path="lib/libxarm_kinematics_plugin">
+  <class name="xarm_kinematics_plugin/XArmKinematicsPlugin" type="xarm_kinematics_plugin::XArmKinematicsPlugin" base_class_type="kinematics::KinematicsBase">
+    <description>
+      An implementation of kinematics as a plugin ONLY for LOBOT xArm.
+    </description>
+  </class>
+</library>
