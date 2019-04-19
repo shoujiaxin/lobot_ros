@@ -1,12 +1,17 @@
 #include <array>
 #include <string>
 
-#include "lobot_hardware_interface/xarm_hardware_interface.h"
+#include "xarm_hardware_interface/xarm_hardware_interface.h"
 
 namespace lobot_hardware_interface {
 
 XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
-    : nh_(nh), controllerManager_(this) {
+    : nh_(nh),
+      controllerManager_(this),
+      gripperCmdServer_(
+          nh, "xarm_gripper_command",
+          boost::bind(&XArmHardwareInterface::GripperCmdCallback, this, _1),
+          false) {
   // Names of arm joints
   const std::array<std::string, SERVO_NUM> jointName{
       "arm_joint1", "arm_joint2", "arm_joint3",
@@ -30,6 +35,8 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
   timer = nh.createTimer(
       ros::Duration(0.1),
       &lobot_hardware_interface::XArmHardwareInterface::update, this);
+
+  gripperCmdServer_.start();
 }
 
 XArmHardwareInterface::~XArmHardwareInterface() {}
@@ -40,7 +47,9 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "xarm_hardware_interface");
   ros::NodeHandle nh;
   ros::AsyncSpinner spinner(2);
-  lobot_hardware_interface::XArmHardwareInterface xArm(nh);
+
+  lobot_hardware_interface::XArmHardwareInterface xArmHWInterface(nh);
+
   spinner.start();
   ros::waitForShutdown();
 

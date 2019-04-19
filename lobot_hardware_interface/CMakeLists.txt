@@ -8,6 +8,8 @@ project(lobot_hardware_interface)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  control_msgs
   controller_manager
   hardware_interface
   roscpp
@@ -105,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lobot_hardware_interface
-#  CATKIN_DEPENDS controller_manager hardware_interface roscpp
+  CATKIN_DEPENDS actionlib control_msgs controller_manager hardware_interface roscpp
 #  DEPENDS system_lib
 )
 
@@ -153,7 +155,6 @@ target_link_libraries(xarm_hardware_interface
   ${catkin_LIBRARIES}
   hidapi
 )
-
 
 #############
 ## Install ##

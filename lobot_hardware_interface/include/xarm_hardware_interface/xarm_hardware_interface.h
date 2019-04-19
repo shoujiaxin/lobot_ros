@@ -1,6 +1,8 @@
 #ifndef XARM_HARDWARE_INTERFACE_H
 #define XARM_HARDWARE_INTERFACE_H
 
+#include <actionlib/server/simple_action_server.h>
+#include <control_msgs/GripperCommandAction.h>
 #include <controller_manager/controller_manager.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -40,6 +42,14 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   XArmDriver xArmDriver_;
 
   ros::Timer timer;
+
+  // Gripper control
+  actionlib::SimpleActionServer<control_msgs::GripperCommandAction>
+      gripperCmdServer_;
+  control_msgs::GripperCommandActionFeedback gripperCmdFeedback_;
+  control_msgs::GripperCommandActionResult gripperCmdResult_;
+
+  void GripperCmdCallback(const control_msgs::GripperCommandGoalConstPtr& goal);
 };
 
 // Get joints' current angles
@@ -61,6 +71,16 @@ inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
 inline void XArmHardwareInterface::write(const ros::Time& time,
                                          const ros::Duration& period) {
   xArmDriver_.Execute(jointPositionCmd_, period);
+}
+
+inline void XArmHardwareInterface::GripperCmdCallback(
+    const control_msgs::GripperCommandGoalConstPtr& goal) {
+  jointPositionCmd_[5] = goal->command.position;
+  gripperCmdFeedback_.feedback.position = jointPosition_[5];
+
+  if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
+    gripperCmdResult_.result.reached_goal = true;
+  }
 }
 
 }  // namespace lobot_hardware_interface
