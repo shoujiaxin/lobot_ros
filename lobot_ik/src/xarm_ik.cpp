@@ -7,7 +7,7 @@ namespace lobot_ik {
 bool XArmIk::SetPoseTarget(
     const geometry_msgs::Pose& p,
     moveit::planning_interface::MoveGroupInterface& group) {
-  auto pose = p;  // Make a copy of the pose
+  geometry_msgs::Pose pose = p;  // Make a copy of the pose
   if (!IsPoseReachable(pose) && !RevisePose(pose)) {
     return false;
   }
@@ -35,7 +35,7 @@ bool XArmIk::SetPoseTarget(
 bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      if (abs(r[i][j]) < 1e-8) {
+      if (abs(r[i][j]) < FLT_EPSILON) {
         r[i][j] = 0;
       }
     }
@@ -304,16 +304,16 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
 
   // Check joints' limit
   if (t1 < -2 * M_PI / 3 || t1 > 2 * M_PI / 3 || t2 < -M_PI || t2 > 0 ||
-      t3 < -2 || t3 > 2 || t4 < -2 || t4 > 2 || t5 < -2 * M_PI / 3 ||
-      t5 > 2 * M_PI / 3) {
+      t3 < -2 || t3 > 2 || t4 < -2 - M_PI / 2 || t4 > 2 - M_PI / 2 ||
+      t5 < -2 * M_PI / 3 || t5 > 2 * M_PI / 3) {
     return false;
   }
 
   jointValueVec_[0] = t1;
   jointValueVec_[1] = t2 + M_PI / 2;
   jointValueVec_[2] = t3;
-  jointValueVec_[3] = t4;
-  jointValueVec_[4] = t5;
+  jointValueVec_[3] = t4 + M_PI / 2;
+  jointValueVec_[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;
 
   return true;
 }
@@ -323,12 +323,19 @@ bool XArmIk::RevisePose(geometry_msgs::Pose& pose) {
                    pose.orientation.w);
   tf::Matrix3x3 rotateMatrix(q);
   double roll, pitch, yaw;
-  rotateMatrix.getRPY(roll, pitch, yaw, 2);
+  rotateMatrix.getRPY(roll, pitch, yaw);
 
   if (pose.position.x != 0) {
     yaw = atan(pose.position.y / pose.position.x);
     pose.orientation =
         tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
+    std::cout << "Revise yaw: " << yaw << std::endl;
+  } else if (pose.position.y > 0) {
+    pose.orientation =
+        tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, M_PI / 2);
+  } else if (pose.position.y < 0) {
+    pose.orientation =
+        tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, -M_PI / 2);
   }
 
   return IsPoseReachable(pose);

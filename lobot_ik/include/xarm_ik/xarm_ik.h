@@ -5,9 +5,9 @@
 #include <tf/tf.h>
 #include <array>
 
-#define JOINT_NUM 5
-
 namespace lobot_ik {
+
+#define JOINT_NUM 5
 
 class XArmIk {
  public:
@@ -33,7 +33,7 @@ inline bool XArmIk::IsPoseReachable(const geometry_msgs::Pose& pose) {
 
   constexpr double threshold = 0.01;
 
-  if (pose.position.x == 0 && abs(cos(yaw)) > 0.99) {
+  if (pose.position.x == 0 && abs(sin(yaw)) > 0.99) {
     return true;
   }
 
