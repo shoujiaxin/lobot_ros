@@ -9,6 +9,7 @@ bool XArmIk::SetPoseTarget(
     moveit::planning_interface::MoveGroupInterface& group) {
   geometry_msgs::Pose pose = p;  // Make a copy of the pose
   if (!IsPoseReachable(pose) && !RevisePose(pose)) {
+    ROS_ERROR_NAMED("xarm_ik", "The target pose is not reachable");
     return false;
   }
 
@@ -59,124 +60,119 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
     theta3 =
         2 *
         atan(sqrt(
-            (2 * pow(a1, 2) * pow(a2, 2) - pow(a2, 4) - pow(a3, 4) -
-             pow(px, 4) - pow(py, 4) - pow(pz, 4) - pow(a1, 4) +
-             2 * pow(a1, 2) * pow(a3, 2) + 2 * pow(a2, 2) * pow(a3, 2) +
-             2 * pow(a1, 2) * pow(px, 2) + 2 * pow(a2, 2) * pow(px, 2) +
-             2 * pow(a3, 2) * pow(px, 2) + 2 * pow(a1, 2) * pow(py, 2) +
-             2 * pow(a2, 2) * pow(py, 2) + 2 * pow(a3, 2) * pow(py, 2) -
-             2 * pow(a1, 2) * pow(pz, 2) + 2 * pow(a2, 2) * pow(pz, 2) +
-             2 * pow(a3, 2) * pow(pz, 2) - 2 * pow(px, 2) * pow(py, 2) -
-             2 * pow(px, 2) * pow(pz, 2) - 2 * pow(py, 2) * pow(pz, 2) +
-             8 * a1 * a2 * a3 * sqrt(pow(px, 2) + pow(py, 2))) /
-            ((pow(px, 2) + pow(py, 2)) *
-                 (-2 * pow(a1, 2) - 2 * pow(a2, 2) + 4 * a2 * a3 -
-                  2 * pow(a3, 2) + pow(px, 2) + pow(py, 2) + 2 * pow(pz, 2)) -
-             4 * a2 * pow(a3, 3) - 4 * pow(a2, 3) * a3 + pow(a1, 4) +
-             pow(a2, 4) + pow(a3, 4) + pow(pz, 4) -
-             2 * pow(a1, 2) * pow(a2, 2) - 2 * pow(a1, 2) * pow(a3, 2) +
-             6 * pow(a2, 2) * pow(a3, 2) + 2 * pow(a1, 2) * pow(pz, 2) -
-             2 * pow(a2, 2) * pow(pz, 2) - 2 * pow(a3, 2) * pow(pz, 2) +
-             4 * pow(a1, 2) * a2 * a3 + 4 * a2 * a3 * pow(pz, 2))));
+            (2 * a1 * a1 * a2 * a2 - a2 * a2 * a2 * a2 - a3 * a3 * a3 * a3 -
+             px * px * px * px - py * py * py * py - pz * pz * pz * pz -
+             a1 * a1 * a1 * a1 + 2 * a1 * a1 * a3 * a3 + 2 * a2 * a2 * a3 * a3 +
+             2 * a1 * a1 * px * px + 2 * a2 * a2 * px * px +
+             2 * a3 * a3 * px * px + 2 * a1 * a1 * py * py +
+             2 * a2 * a2 * py * py + 2 * a3 * a3 * py * py -
+             2 * a1 * a1 * pz * pz + 2 * a2 * a2 * pz * pz +
+             2 * a3 * a3 * pz * pz - 2 * px * px * py * py -
+             2 * px * px * pz * pz - 2 * py * py * pz * pz +
+             8 * a1 * a2 * a3 * sqrt(px * px + py * py)) /
+            ((px * px + py * py) *
+                 (-2 * a1 * a1 - 2 * a2 * a2 + 4 * a2 * a3 - 2 * a3 * a3 +
+                  px * px + py * py + 2 * pz * pz) -
+             4 * a2 * a3 * a3 * a3 - 4 * a2 * a2 * a2 * a3 + a1 * a1 * a1 * a1 +
+             a2 * a2 * a2 * a2 + a3 * a3 * a3 * a3 + pz * pz * pz * pz -
+             2 * a1 * a1 * a2 * a2 - 2 * a1 * a1 * a3 * a3 +
+             6 * a2 * a2 * a3 * a3 + 2 * a1 * a1 * pz * pz -
+             2 * a2 * a2 * pz * pz - 2 * a3 * a3 * pz * pz +
+             4 * a1 * a1 * a2 * a3 + 4 * a2 * a3 * pz * pz)));
   } else {
     theta3 =
         -2 *
-        atan(sqrt(
-            -(pow(a1, 4) + pow(a2, 4) + pow(a3, 4) + pow(px, 4) + pow(py, 4) +
-              pow(pz, 4) - 2 * pow(a1, 2) * pow(a2, 2) -
-              2 * pow(a1, 2) * pow(a3, 2) - 2 * pow(a2, 2) * pow(a3, 2) -
-              2 * pow(a1, 2) * pow(px, 2) - 2 * pow(a2, 2) * pow(px, 2) -
-              2 * pow(a3, 2) * pow(px, 2) - 2 * pow(a1, 2) * pow(py, 2) -
-              2 * pow(a2, 2) * pow(py, 2) - 2 * pow(a3, 2) * pow(py, 2) +
-              2 * pow(a1, 2) * pow(pz, 2) - 2 * pow(a2, 2) * pow(pz, 2) -
-              2 * pow(a3, 2) * pow(pz, 2) + 2 * pow(px, 2) * pow(py, 2) +
-              2 * pow(px, 2) * pow(pz, 2) + 2 * pow(py, 2) * pow(pz, 2) +
-              8 * a1 * a2 * a3 * sqrt(pow(px, 2) + pow(py, 2))) /
-            ((pow(px, 2) + pow(py, 2)) *
-                 (-2 * pow(a1, 2) - 2 * pow(a2, 2) + 4 * a2 * a3 -
-                  2 * pow(a3, 2) + pow(px, 2) + pow(py, 2) + 2 * pow(pz, 2)) -
-             4 * a2 * pow(a3, 3) - 4 * pow(a2, 3) * a3 + pow(a1, 4) +
-             pow(a2, 4) + pow(a3, 4) + pow(pz, 4) -
-             2 * pow(a1, 2) * pow(a2, 2) - 2 * pow(a1, 2) * pow(a3, 2) +
-             6 * pow(a2, 2) * pow(a3, 2) + 2 * pow(a1, 2) * pow(pz, 2) -
-             2 * pow(a2, 2) * pow(pz, 2) - 2 * pow(a3, 2) * pow(pz, 2) +
-             4 * pow(a1, 2) * a2 * a3 + 4 * a2 * a3 * pow(pz, 2))));
+        atan(sqrt(-(a1 * a1 * a1 * a1 + a2 * a2 * a2 * a2 + a3 * a3 * a3 * a3 +
+                    px * px * px * px + py * py * py * py + pz * pz * pz * pz -
+                    2 * a1 * a1 * a2 * a2 - 2 * a1 * a1 * a3 * a3 -
+                    2 * a2 * a2 * a3 * a3 - 2 * a1 * a1 * px * px -
+                    2 * a2 * a2 * px * px - 2 * a3 * a3 * px * px -
+                    2 * a1 * a1 * py * py - 2 * a2 * a2 * py * py -
+                    2 * a3 * a3 * py * py + 2 * a1 * a1 * pz * pz -
+                    2 * a2 * a2 * pz * pz - 2 * a3 * a3 * pz * pz +
+                    2 * px * px * py * py + 2 * px * px * pz * pz +
+                    2 * py * py * pz * pz +
+                    8 * a1 * a2 * a3 * sqrt(px * px + py * py)) /
+                  ((px * px + py * py) *
+                       (-2 * a1 * a1 - 2 * a2 * a2 + 4 * a2 * a3 - 2 * a3 * a3 +
+                        px * px + py * py + 2 * pz * pz) -
+                   4 * a2 * a3 * a3 * a3 - 4 * a2 * a2 * a2 * a3 +
+                   a1 * a1 * a1 * a1 + a2 * a2 * a2 * a2 + a3 * a3 * a3 * a3 +
+                   pz * pz * pz * pz - 2 * a1 * a1 * a2 * a2 -
+                   2 * a1 * a1 * a3 * a3 + 6 * a2 * a2 * a3 * a3 +
+                   2 * a1 * a1 * pz * pz - 2 * a2 * a2 * pz * pz -
+                   2 * a3 * a3 * pz * pz + 4 * a1 * a1 * a2 * a3 +
+                   4 * a2 * a3 * pz * pz)));
   }
   double t3 = real(theta3);
   double s3 = sin(t3);
   double c3 = cos(t3);
 
   std::complex<double> theta2 =
-      (pz > 0) ? (-2 * atan((sqrt(-pow(a1, 4) + 2 * pow(a1, 2) * pow(a2, 2) +
-                                  4 * pow(a1, 2) * a2 * a3 * c3 +
-                                  2 * pow(a1, 2) * pow(a3, 2) * pow(c3, 2) +
-                                  2 * pow(a1, 2) * pow(a3, 2) * pow(s3, 2) +
-                                  2 * pow(a1, 2) * pow(px, 2) +
-                                  2 * pow(a1, 2) * pow(py, 2) +
-                                  2 * pow(a1, 2) * pow(pz, 2) - pow(a2, 4) -
-                                  4 * pow(a2, 3) * a3 * c3 -
-                                  6 * pow(a2, 2) * pow(a3, 2) * pow(c3, 2) -
-                                  2 * pow(a2, 2) * pow(a3, 2) * pow(s3, 2) +
-                                  2 * pow(a2, 2) * pow(px, 2) +
-                                  2 * pow(a2, 2) * pow(py, 2) +
-                                  2 * pow(a2, 2) * pow(pz, 2) -
-                                  4 * a2 * pow(a3, 3) * pow(c3, 3) -
-                                  4 * a2 * pow(a3, 3) * c3 * pow(s3, 2) +
-                                  4 * a2 * a3 * c3 * pow(px, 2) +
-                                  4 * a2 * a3 * c3 * pow(py, 2) +
-                                  4 * a2 * a3 * c3 * pow(pz, 2) -
-                                  pow(a3, 4) * pow(c3, 4) -
-                                  2 * pow(a3, 4) * pow(c3, 2) * pow(s3, 2) -
-                                  pow(a3, 4) * pow(s3, 4) +
-                                  2 * pow(a3, 2) * pow(c3, 2) * pow(px, 2) +
-                                  2 * pow(a3, 2) * pow(c3, 2) * pow(py, 2) +
-                                  2 * pow(a3, 2) * pow(c3, 2) * pow(pz, 2) +
-                                  2 * pow(a3, 2) * pow(px, 2) * pow(s3, 2) +
-                                  2 * pow(a3, 2) * pow(py, 2) * pow(s3, 2) +
-                                  2 * pow(a3, 2) * pow(pz, 2) * pow(s3, 2) -
-                                  pow(px, 4) - 2 * pow(px, 2) * pow(py, 2) -
-                                  2 * pow(px, 2) * pow(pz, 2) - pow(py, 4) -
-                                  2 * pow(py, 2) * pow(pz, 2) - pow(pz, 4)) +
-                             2 * a1 * a3 * s3) /
-                            (-pow(a1, 2) + 2 * a1 * a2 + 2 * a1 * a3 * c3 -
-                             pow(a2, 2) - 2 * a2 * a3 * c3 -
-                             pow(a3, 2) * pow(c3, 2) - pow(a3, 2) * pow(s3, 2) +
-                             pow(px, 2) + pow(py, 2) + pow(pz, 2))))
-               : (2 * atan((sqrt(-pow(a1, 4) + 2 * pow(a1, 2) * pow(a2, 2) +
-                                 4 * pow(a1, 2) * a2 * a3 * c3 +
-                                 2 * pow(a1, 2) * pow(a3, 2) * pow(c3, 2) +
-                                 2 * pow(a1, 2) * pow(a3, 2) * pow(s3, 2) +
-                                 2 * pow(a1, 2) * pow(px, 2) +
-                                 2 * pow(a1, 2) * pow(py, 2) +
-                                 2 * pow(a1, 2) * pow(pz, 2) - pow(a2, 4) -
-                                 4 * pow(a2, 3) * a3 * c3 -
-                                 6 * pow(a2, 2) * pow(a3, 2) * pow(c3, 2) -
-                                 2 * pow(a2, 2) * pow(a3, 2) * pow(s3, 2) +
-                                 2 * pow(a2, 2) * pow(px, 2) +
-                                 2 * pow(a2, 2) * pow(py, 2) +
-                                 2 * pow(a2, 2) * pow(pz, 2) -
-                                 4 * a2 * pow(a3, 3) * pow(c3, 3) -
-                                 4 * a2 * pow(a3, 3) * c3 * pow(s3, 2) +
-                                 4 * a2 * a3 * c3 * pow(px, 2) +
-                                 4 * a2 * a3 * c3 * pow(py, 2) +
-                                 4 * a2 * a3 * c3 * pow(pz, 2) -
-                                 pow(a3, 4) * pow(c3, 4) -
-                                 2 * pow(a3, 4) * pow(c3, 2) * pow(s3, 2) -
-                                 pow(a3, 4) * pow(s3, 4) +
-                                 2 * pow(a3, 2) * pow(c3, 2) * pow(px, 2) +
-                                 2 * pow(a3, 2) * pow(c3, 2) * pow(py, 2) +
-                                 2 * pow(a3, 2) * pow(c3, 2) * pow(pz, 2) +
-                                 2 * pow(a3, 2) * pow(px, 2) * pow(s3, 2) +
-                                 2 * pow(a3, 2) * pow(py, 2) * pow(s3, 2) +
-                                 2 * pow(a3, 2) * pow(pz, 2) * pow(s3, 2) -
-                                 pow(px, 4) - 2 * pow(px, 2) * pow(py, 2) -
-                                 2 * pow(px, 2) * pow(pz, 2) - pow(py, 4) -
-                                 2 * pow(py, 2) * pow(pz, 2) - pow(pz, 4)) -
-                            2 * a1 * a3 * s3) /
-                           (-pow(a1, 2) + 2 * a1 * a2 + 2 * a1 * a3 * c3 -
-                            pow(a2, 2) - 2 * a2 * a3 * c3 -
-                            pow(a3, 2) * pow(c3, 2) - pow(a3, 2) * pow(s3, 2) +
-                            pow(px, 2) + pow(py, 2) + pow(pz, 2))));
+      (pz > 0)
+          ? (-2 *
+             atan(
+                 (sqrt(-a1 * a1 * a1 * a1 + 2 * a1 * a1 * a2 * a2 +
+                       4 * a1 * a1 * a2 * a3 * c3 +
+                       2 * a1 * a1 * a3 * a3 * c3 * c3 +
+                       2 * a1 * a1 * a3 * a3 * s3 * s3 + 2 * a1 * a1 * px * px +
+                       2 * a1 * a1 * py * py + 2 * a1 * a1 * pz * pz -
+                       a2 * a2 * a2 * a2 - 4 * a2 * a2 * a2 * a3 * c3 -
+                       6 * a2 * a2 * a3 * a3 * c3 * c3 -
+                       2 * a2 * a2 * a3 * a3 * s3 * s3 + 2 * a2 * a2 * px * px +
+                       2 * a2 * a2 * py * py + 2 * a2 * a2 * pz * pz -
+                       4 * a2 * a3 * a3 * a3 * c3 * c3 * c3 -
+                       4 * a2 * a3 * a3 * a3 * c3 * s3 * s3 +
+                       4 * a2 * a3 * c3 * px * px + 4 * a2 * a3 * c3 * py * py +
+                       4 * a2 * a3 * c3 * pz * pz -
+                       a3 * a3 * a3 * a3 * c3 * c3 * c3 * c3 -
+                       2 * a3 * a3 * a3 * a3 * c3 * c3 * s3 * s3 -
+                       a3 * a3 * a3 * a3 * s3 * s3 * s3 * s3 +
+                       2 * a3 * a3 * c3 * c3 * px * px +
+                       2 * a3 * a3 * c3 * c3 * py * py +
+                       2 * a3 * a3 * c3 * c3 * pz * pz +
+                       2 * a3 * a3 * px * px * s3 * s3 +
+                       2 * a3 * a3 * py * py * s3 * s3 +
+                       2 * a3 * a3 * pz * pz * s3 * s3 - px * px * px * px -
+                       2 * px * px * py * py - 2 * px * px * pz * pz -
+                       py * py * py * py - 2 * py * py * pz * pz -
+                       pz * pz * pz * pz) +
+                  2 * a1 * a3 * s3) /
+                 (-a1 * a1 + 2 * a1 * a2 + 2 * a1 * a3 * c3 - a2 * a2 -
+                  2 * a2 * a3 * c3 - a3 * a3 * c3 * c3 - a3 * a3 * s3 * s3 +
+                  px * px + py * py + pz * pz)))
+          : (2 * atan((sqrt(-a1 * a1 * a1 * a1 + 2 * a1 * a1 * a2 * a2 +
+                            4 * a1 * a1 * a2 * a3 * c3 +
+                            2 * a1 * a1 * a3 * a3 * c3 * c3 +
+                            2 * a1 * a1 * a3 * a3 * s3 * s3 +
+                            2 * a1 * a1 * px * px + 2 * a1 * a1 * py * py +
+                            2 * a1 * a1 * pz * pz - a2 * a2 * a2 * a2 -
+                            4 * a2 * a2 * a2 * a3 * c3 -
+                            6 * a2 * a2 * a3 * a3 * c3 * c3 -
+                            2 * a2 * a2 * a3 * a3 * s3 * s3 +
+                            2 * a2 * a2 * px * px + 2 * a2 * a2 * py * py +
+                            2 * a2 * a2 * pz * pz -
+                            4 * a2 * a3 * a3 * a3 * c3 * c3 * c3 -
+                            4 * a2 * a3 * a3 * a3 * c3 * s3 * s3 +
+                            4 * a2 * a3 * c3 * px * px +
+                            4 * a2 * a3 * c3 * py * py +
+                            4 * a2 * a3 * c3 * pz * pz -
+                            a3 * a3 * a3 * a3 * c3 * c3 * c3 * c3 -
+                            2 * a3 * a3 * a3 * a3 * c3 * c3 * s3 * s3 -
+                            a3 * a3 * a3 * a3 * s3 * s3 * s3 * s3 +
+                            2 * a3 * a3 * c3 * c3 * px * px +
+                            2 * a3 * a3 * c3 * c3 * py * py +
+                            2 * a3 * a3 * c3 * c3 * pz * pz +
+                            2 * a3 * a3 * px * px * s3 * s3 +
+                            2 * a3 * a3 * py * py * s3 * s3 +
+                            2 * a3 * a3 * pz * pz * s3 * s3 -
+                            px * px * px * px - 2 * px * px * py * py -
+                            2 * px * px * pz * pz - py * py * py * py -
+                            2 * py * py * pz * pz - pz * pz * pz * pz) -
+                       2 * a1 * a3 * s3) /
+                      (-a1 * a1 + 2 * a1 * a2 + 2 * a1 * a3 * c3 - a2 * a2 -
+                       2 * a2 * a3 * c3 - a3 * a3 * c3 * c3 -
+                       a3 * a3 * s3 * s3 + px * px + py * py + pz * pz)));
   double t2 = real(theta2);
   double s2 = sin(t2);
   double c2 = cos(t2);
@@ -190,172 +186,164 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
   double s1 = sin(t1);
   double c1 = cos(t1);
 
-  double t4 =
-      atan2((az * (c2 * s3 + c3 * s2)) /
-                    (pow(c2, 2) * pow(c3, 2) + pow(c2, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s2, 2) + pow(s2, 2) * pow(s3, 2)) -
-                (ax * (c1 * c2 * c3 - c1 * s2 * s3)) /
-                    (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) +
-                     pow(c1, 2) * pow(c2, 2) * pow(s3, 2) +
-                     pow(c1, 2) * pow(c3, 2) * pow(s2, 2) +
-                     pow(c1, 2) * pow(s2, 2) * pow(s3, 2) +
-                     pow(c2, 2) * pow(c3, 2) * pow(s1, 2) +
-                     pow(c2, 2) * pow(s1, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s1, 2) * pow(s2, 2) +
-                     pow(s1, 2) * pow(s2, 2) * pow(s3, 2)) -
-                (ay * (c2 * c3 * s1 - s1 * s2 * s3)) /
-                    (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) +
-                     pow(c1, 2) * pow(c2, 2) * pow(s3, 2) +
-                     pow(c1, 2) * pow(c3, 2) * pow(s2, 2) +
-                     pow(c1, 2) * pow(s2, 2) * pow(s3, 2) +
-                     pow(c2, 2) * pow(c3, 2) * pow(s1, 2) +
-                     pow(c2, 2) * pow(s1, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s1, 2) * pow(s2, 2) +
-                     pow(s1, 2) * pow(s2, 2) * pow(s3, 2)),
-            -(ax * (c1 * c2 * s3 + c1 * c3 * s2)) /
-                    (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) +
-                     pow(c1, 2) * pow(c2, 2) * pow(s3, 2) +
-                     pow(c1, 2) * pow(c3, 2) * pow(s2, 2) +
-                     pow(c1, 2) * pow(s2, 2) * pow(s3, 2) +
-                     pow(c2, 2) * pow(c3, 2) * pow(s1, 2) +
-                     pow(c2, 2) * pow(s1, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s1, 2) * pow(s2, 2) +
-                     pow(s1, 2) * pow(s2, 2) * pow(s3, 2)) -
-                (az * (c2 * c3 - s2 * s3)) /
-                    (pow(c2, 2) * pow(c3, 2) + pow(c2, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s2, 2) + pow(s2, 2) * pow(s3, 2)) -
-                (ay * s1 * (c2 * s3 + c3 * s2)) /
-                    (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) +
-                     pow(c1, 2) * pow(c2, 2) * pow(s3, 2) +
-                     pow(c1, 2) * pow(c3, 2) * pow(s2, 2) +
-                     pow(c1, 2) * pow(s2, 2) * pow(s3, 2) +
-                     pow(c2, 2) * pow(c3, 2) * pow(s1, 2) +
-                     pow(c2, 2) * pow(s1, 2) * pow(s3, 2) +
-                     pow(c3, 2) * pow(s1, 2) * pow(s2, 2) +
-                     pow(s1, 2) * pow(s2, 2) * pow(s3, 2)));
+  double t4 = atan2(
+      (az * (c2 * s3 + c3 * s2)) / (c2 * c2 * c3 * c3 + c2 * c2 * s3 * s3 +
+                                    c3 * c3 * s2 * s2 + s2 * s2 * s3 * s3) -
+          (ax * (c1 * c2 * c3 - c1 * s2 * s3)) /
+              (c1 * c1 * c2 * c2 * c3 * c3 + c1 * c1 * c2 * c2 * s3 * s3 +
+               c1 * c1 * c3 * c3 * s2 * s2 + c1 * c1 * s2 * s2 * s3 * s3 +
+               c2 * c2 * c3 * c3 * s1 * s1 + c2 * c2 * s1 * s1 * s3 * s3 +
+               c3 * c3 * s1 * s1 * s2 * s2 + s1 * s1 * s2 * s2 * s3 * s3) -
+          (ay * (c2 * c3 * s1 - s1 * s2 * s3)) /
+              (c1 * c1 * c2 * c2 * c3 * c3 + c1 * c1 * c2 * c2 * s3 * s3 +
+               c1 * c1 * c3 * c3 * s2 * s2 + c1 * c1 * s2 * s2 * s3 * s3 +
+               c2 * c2 * c3 * c3 * s1 * s1 + c2 * c2 * s1 * s1 * s3 * s3 +
+               c3 * c3 * s1 * s1 * s2 * s2 + s1 * s1 * s2 * s2 * s3 * s3),
+      -(ax * (c1 * c2 * s3 + c1 * c3 * s2)) /
+              (c1 * c1 * c2 * c2 * c3 * c3 + c1 * c1 * c2 * c2 * s3 * s3 +
+               c1 * c1 * c3 * c3 * s2 * s2 + c1 * c1 * s2 * s2 * s3 * s3 +
+               c2 * c2 * c3 * c3 * s1 * s1 + c2 * c2 * s1 * s1 * s3 * s3 +
+               c3 * c3 * s1 * s1 * s2 * s2 + s1 * s1 * s2 * s2 * s3 * s3) -
+          (az * (c2 * c3 - s2 * s3)) / (c2 * c2 * c3 * c3 + c2 * c2 * s3 * s3 +
+                                        c3 * c3 * s2 * s2 + s2 * s2 * s3 * s3) -
+          (ay * s1 * (c2 * s3 + c3 * s2)) /
+              (c1 * c1 * c2 * c2 * c3 * c3 + c1 * c1 * c2 * c2 * s3 * s3 +
+               c1 * c1 * c3 * c3 * s2 * s2 + c1 * c1 * s2 * s2 * s3 * s3 +
+               c2 * c2 * c3 * c3 * s1 * s1 + c2 * c2 * s1 * s1 * s3 * s3 +
+               c3 * c3 * s1 * s1 * s2 * s2 + s1 * s1 * s2 * s2 * s3 * s3));
   double s4 = sin(t4);
   double c4 = cos(t4);
 
-  double t5 = atan2(
-      (oz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
-              (pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s2, 2) * pow(s3, 2) * pow(s4, 2)) +
-          (oy * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 -
-                 c2 * c3 * c4 * s1)) /
-              (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(c4, 2) * pow(s1, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s1, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s1, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s1, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s1, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s1, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s1, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)) +
-          (c1 * ox *
-           (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
-              (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(c4, 2) * pow(s1, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s1, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s1, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s1, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s1, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s1, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s1, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)),
-      -(nz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
-              (pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s2, 2) * pow(s3, 2) * pow(s4, 2)) -
-          (ny * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 -
-                 c2 * c3 * c4 * s1)) /
-              (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(c4, 2) * pow(s1, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s1, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s1, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s1, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s1, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s1, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s1, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)) -
-          (c1 * nx *
-           (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
-              (pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(c4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(c4, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(c2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(c4, 2) * pow(s2, 2) +
-               pow(c1, 2) * pow(c3, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c1, 2) * pow(c4, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(c1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(c4, 2) * pow(s1, 2) +
-               pow(c2, 2) * pow(c3, 2) * pow(s1, 2) * pow(s4, 2) +
-               pow(c2, 2) * pow(c4, 2) * pow(s1, 2) * pow(s3, 2) +
-               pow(c2, 2) * pow(s1, 2) * pow(s3, 2) * pow(s4, 2) +
-               pow(c3, 2) * pow(c4, 2) * pow(s1, 2) * pow(s2, 2) +
-               pow(c3, 2) * pow(s1, 2) * pow(s2, 2) * pow(s4, 2) +
-               pow(c4, 2) * pow(s1, 2) * pow(s2, 2) * pow(s3, 2) +
-               pow(s1, 2) * pow(s2, 2) * pow(s3, 2) * pow(s4, 2)));
+  double t5 = atan(
+      ((oz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
+           (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s3 * s3 + c2 * c2 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) +
+       (oy * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 -
+              c2 * c3 * c4 * s1)) /
+           (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 +
+            c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+            c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 +
+            c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+            c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 +
+            c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+            c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 +
+            c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+            c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 +
+            c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 +
+            c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 +
+            c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 +
+            s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) +
+       (c1 * ox * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
+           (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 +
+            c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+            c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 +
+            c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+            c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 +
+            c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+            c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 +
+            c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+            c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 +
+            c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 +
+            c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 +
+            c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 +
+            s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)) /
+      (-(nz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
+           (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s3 * s3 + c2 * c2 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) -
+       (ny * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 -
+              c2 * c3 * c4 * s1)) /
+           (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 +
+            c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+            c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 +
+            c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+            c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 +
+            c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+            c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 +
+            c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+            c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 +
+            c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 +
+            c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 +
+            c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 +
+            s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) -
+       (c1 * nx * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
+           (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 +
+            c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+            c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 +
+            c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+            c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 +
+            c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+            c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 +
+            c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+            c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 +
+            c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+            c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 +
+            c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+            c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 +
+            c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+            c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 +
+            s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
   // Check joints' limit
-  if (t1 < -2 * M_PI / 3 || t1 > 2 * M_PI / 3 || t2 < -M_PI || t2 > 0 ||
-      t3 < -2 || t3 > 2 || t4 < -2 - M_PI / 2 || t4 > 2 - M_PI / 2 ||
-      t5 < -2 * M_PI / 3 || t5 > 2 * M_PI / 3) {
+  if (-M_PI < t1 && t1 < M_PI) {
+    jointValueVec_[0] = t1;
+  } else {
+    ROS_ERROR_NAMED("xarm_ik", "The value of joint 1 is out of bounds");
     return false;
   }
 
-  jointValueVec_[0] = t1;
-  jointValueVec_[1] = t2 + M_PI / 2;
-  jointValueVec_[2] = t3;
-  jointValueVec_[3] = t4 + M_PI / 2;
-  jointValueVec_[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;
+  if (-M_PI < t2 && t2 < 0) {
+    jointValueVec_[1] = t2 + M_PI / 2;
+  } else {
+    ROS_ERROR_NAMED("xarm_ik", "The value of joint 2 is out of bounds");
+    return false;
+  }
+
+  if (-2 < t3 && t3 < 2) {
+    jointValueVec_[2] = t3;
+  } else {
+    ROS_ERROR_NAMED("xarm_ik", "The value of joint 3 is out of bounds");
+    return false;
+  }
+
+  if (-2 - M_PI < t4 && t4 < 2) {
+    jointValueVec_[3] = t4 + M_PI / 2;
+  } else {
+    ROS_ERROR_NAMED("xarm_ik", "The value of joint 4 is out of bounds");
+    return false;
+  }
+
+  if (-M_PI < t5 && t5 < M_PI) {
+    jointValueVec_[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;
+  } else {
+    ROS_ERROR_NAMED("xarm_ik", "The value of joint 5 is out of bounds");
+    return false;
+  }
 
   return true;
 }
 
 bool XArmIk::RevisePose(geometry_msgs::Pose& pose) {
-  tf::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z,
-                   pose.orientation.w);
-  tf::Matrix3x3 rotateMatrix(q);
   double roll, pitch, yaw;
-  rotateMatrix.getRPY(roll, pitch, yaw);
+  QuaternionToRPY(pose.orientation, roll, pitch, yaw);
 
   if (pose.position.x != 0) {
     yaw = atan2(pose.position.y, pose.position.x);
     pose.orientation =
         tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
-    std::cout << "Revise yaw: " << yaw << std::endl;
+    std::cout << "Revise: " << yaw << std::endl;
   } else if (pose.position.y > 0) {
     pose.orientation =
         tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, M_PI / 2);
