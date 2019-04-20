@@ -54,27 +54,54 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
   const double py = p.y - toolLength * r[1][0];
   const double pz = p.z - toolLength * r[2][0] - baseHeight;
 
-  std::complex<double> theta3 =
-      2 * atan(sqrt(
-              (2 * pow(a1, 2) * pow(a2, 2) - pow(a2, 4) - pow(a3, 4) -
-               pow(px, 4) - pow(py, 4) - pow(pz, 4) - pow(a1, 4) +
-               2 * pow(a1, 2) * pow(a3, 2) + 2 * pow(a2, 2) * pow(a3, 2) +
-               2 * pow(a1, 2) * pow(px, 2) + 2 * pow(a2, 2) * pow(px, 2) +
-               2 * pow(a3, 2) * pow(px, 2) + 2 * pow(a1, 2) * pow(py, 2) +
-               2 * pow(a2, 2) * pow(py, 2) + 2 * pow(a3, 2) * pow(py, 2) -
-               2 * pow(a1, 2) * pow(pz, 2) + 2 * pow(a2, 2) * pow(pz, 2) +
-               2 * pow(a3, 2) * pow(pz, 2) - 2 * pow(px, 2) * pow(py, 2) -
-               2 * pow(px, 2) * pow(pz, 2) - 2 * pow(py, 2) * pow(pz, 2) +
-               8 * a1 * a2 * a3 * sqrt(pow(px, 2) + pow(py, 2))) /
-              ((pow(px, 2) + pow(py, 2)) *
-                   (-2 * pow(a1, 2) - 2 * pow(a2, 2) + 4 * a2 * a3 -
-                    2 * pow(a3, 2) + pow(px, 2) + pow(py, 2) + 2 * pow(pz, 2)) -
-               4 * a2 * pow(a3, 3) - 4 * pow(a2, 3) * a3 + pow(a1, 4) +
-               pow(a2, 4) + pow(a3, 4) + pow(pz, 4) -
-               2 * pow(a1, 2) * pow(a2, 2) - 2 * pow(a1, 2) * pow(a3, 2) +
-               6 * pow(a2, 2) * pow(a3, 2) + 2 * pow(a1, 2) * pow(pz, 2) -
-               2 * pow(a2, 2) * pow(pz, 2) - 2 * pow(a3, 2) * pow(pz, 2) +
-               4 * pow(a1, 2) * a2 * a3 + 4 * a2 * a3 * pow(pz, 2))));
+  std::complex<double> theta3;
+  if (p.y >= 0) {
+    theta3 =
+        2 *
+        atan(sqrt(
+            (2 * pow(a1, 2) * pow(a2, 2) - pow(a2, 4) - pow(a3, 4) -
+             pow(px, 4) - pow(py, 4) - pow(pz, 4) - pow(a1, 4) +
+             2 * pow(a1, 2) * pow(a3, 2) + 2 * pow(a2, 2) * pow(a3, 2) +
+             2 * pow(a1, 2) * pow(px, 2) + 2 * pow(a2, 2) * pow(px, 2) +
+             2 * pow(a3, 2) * pow(px, 2) + 2 * pow(a1, 2) * pow(py, 2) +
+             2 * pow(a2, 2) * pow(py, 2) + 2 * pow(a3, 2) * pow(py, 2) -
+             2 * pow(a1, 2) * pow(pz, 2) + 2 * pow(a2, 2) * pow(pz, 2) +
+             2 * pow(a3, 2) * pow(pz, 2) - 2 * pow(px, 2) * pow(py, 2) -
+             2 * pow(px, 2) * pow(pz, 2) - 2 * pow(py, 2) * pow(pz, 2) +
+             8 * a1 * a2 * a3 * sqrt(pow(px, 2) + pow(py, 2))) /
+            ((pow(px, 2) + pow(py, 2)) *
+                 (-2 * pow(a1, 2) - 2 * pow(a2, 2) + 4 * a2 * a3 -
+                  2 * pow(a3, 2) + pow(px, 2) + pow(py, 2) + 2 * pow(pz, 2)) -
+             4 * a2 * pow(a3, 3) - 4 * pow(a2, 3) * a3 + pow(a1, 4) +
+             pow(a2, 4) + pow(a3, 4) + pow(pz, 4) -
+             2 * pow(a1, 2) * pow(a2, 2) - 2 * pow(a1, 2) * pow(a3, 2) +
+             6 * pow(a2, 2) * pow(a3, 2) + 2 * pow(a1, 2) * pow(pz, 2) -
+             2 * pow(a2, 2) * pow(pz, 2) - 2 * pow(a3, 2) * pow(pz, 2) +
+             4 * pow(a1, 2) * a2 * a3 + 4 * a2 * a3 * pow(pz, 2))));
+  } else {
+    theta3 =
+        -2 *
+        atan(sqrt(
+            -(pow(a1, 4) + pow(a2, 4) + pow(a3, 4) + pow(px, 4) + pow(py, 4) +
+              pow(pz, 4) - 2 * pow(a1, 2) * pow(a2, 2) -
+              2 * pow(a1, 2) * pow(a3, 2) - 2 * pow(a2, 2) * pow(a3, 2) -
+              2 * pow(a1, 2) * pow(px, 2) - 2 * pow(a2, 2) * pow(px, 2) -
+              2 * pow(a3, 2) * pow(px, 2) - 2 * pow(a1, 2) * pow(py, 2) -
+              2 * pow(a2, 2) * pow(py, 2) - 2 * pow(a3, 2) * pow(py, 2) +
+              2 * pow(a1, 2) * pow(pz, 2) - 2 * pow(a2, 2) * pow(pz, 2) -
+              2 * pow(a3, 2) * pow(pz, 2) + 2 * pow(px, 2) * pow(py, 2) +
+              2 * pow(px, 2) * pow(pz, 2) + 2 * pow(py, 2) * pow(pz, 2) +
+              8 * a1 * a2 * a3 * sqrt(pow(px, 2) + pow(py, 2))) /
+            ((pow(px, 2) + pow(py, 2)) *
+                 (-2 * pow(a1, 2) - 2 * pow(a2, 2) + 4 * a2 * a3 -
+                  2 * pow(a3, 2) + pow(px, 2) + pow(py, 2) + 2 * pow(pz, 2)) -
+             4 * a2 * pow(a3, 3) - 4 * pow(a2, 3) * a3 + pow(a1, 4) +
+             pow(a2, 4) + pow(a3, 4) + pow(pz, 4) -
+             2 * pow(a1, 2) * pow(a2, 2) - 2 * pow(a1, 2) * pow(a3, 2) +
+             6 * pow(a2, 2) * pow(a3, 2) + 2 * pow(a1, 2) * pow(pz, 2) -
+             2 * pow(a2, 2) * pow(pz, 2) - 2 * pow(a3, 2) * pow(pz, 2) +
+             4 * pow(a1, 2) * a2 * a3 + 4 * a2 * a3 * pow(pz, 2))));
+  }
   double t3 = real(theta3);
   double s3 = sin(t3);
   double c3 = cos(t3);
@@ -155,8 +182,7 @@ bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
   double c2 = cos(t2);
 
   double numerator = a1 - px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3;
-  numerator =
-      (abs(numerator) < static_cast<double>(FLT_EPSILON)) ? 0 : numerator;
+  numerator = (abs(numerator) < FLT_EPSILON) ? 0 : numerator;
   std::complex<double> theta1 =
       2 *
       atan(sqrt(numerator / (a1 + px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3)));
@@ -326,7 +352,7 @@ bool XArmIk::RevisePose(geometry_msgs::Pose& pose) {
   rotateMatrix.getRPY(roll, pitch, yaw);
 
   if (pose.position.x != 0) {
-    yaw = atan(pose.position.y / pose.position.x);
+    yaw = atan2(pose.position.y, pose.position.x);
     pose.orientation =
         tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
     std::cout << "Revise yaw: " << yaw << std::endl;
