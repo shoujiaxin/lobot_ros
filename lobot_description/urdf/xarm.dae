@@ -717,7 +717,7 @@
 						<axis>0 1 0</axis>
 						<limits>
 							<min>0</min>
-							<max>0.025</max>
+							<max>0.03</max>
 						</limits>
 					</prismatic>
 				</joint>
@@ -725,7 +725,7 @@
 					<prismatic sid="axis0">
 						<axis>0 1 0</axis>
 						<limits>
-							<min>-0.025</min>
+							<min>-0.03</min>
 							<max>0</max>
 						</limits>
 					</prismatic>
@@ -1101,7 +1101,7 @@
 								<float>0</float>
 							</min>
 							<max>
-								<float>0.025</float>
+								<float>0.03</float>
 							</max>
 						</limits>
 					</axis_info>
@@ -1114,7 +1114,7 @@
 						</locked>
 						<limits>
 							<min>
-								<float>-0.025</float>
+								<float>-0.03</float>
 							</min>
 							<max>
 								<float>0</float>
