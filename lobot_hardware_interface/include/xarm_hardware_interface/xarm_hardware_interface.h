@@ -55,7 +55,7 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
 // Get joints' current angles
 inline void XArmHardwareInterface::read(const ros::Time& time,
                                         const ros::Duration& period) {
-  jointPosition_ = *xArmDriver_.GetJointState();
+  xArmDriver_.GetJointState(jointPosition_);
 }
 
 inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
@@ -71,16 +71,6 @@ inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
 inline void XArmHardwareInterface::write(const ros::Time& time,
                                          const ros::Duration& period) {
   xArmDriver_.Execute(jointPositionCmd_, period);
-}
-
-inline void XArmHardwareInterface::GripperCmdCallback(
-    const control_msgs::GripperCommandGoalConstPtr& goal) {
-  jointPositionCmd_[5] = goal->command.position;
-  gripperCmdFeedback_.feedback.position = jointPosition_[5];
-
-  if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
-    gripperCmdResult_.result.reached_goal = true;
-  }
 }
 
 }  // namespace lobot_hardware_interface

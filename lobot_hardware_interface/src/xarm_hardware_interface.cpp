@@ -17,17 +17,21 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
       "arm_joint1", "arm_joint2", "arm_joint3",
       "arm_joint4", "arm_joint5", "gripper_joint1"};
 
-  for (int i = 0; i != SERVO_NUM; ++i) {
-    // Connect and register the joint state interface
+  // Connect and register the joint state & position interface
+  for (int i = 0; i != JOINT_NUM; ++i) {
     hardware_interface::JointStateHandle jointStateHandle(
         jointName[i], &jointPosition_[i], &jointVelocity_[i], &jointEffort_[i]);
     jointStateInterface_.registerHandle(jointStateHandle);
 
-    // Connect and register the joint position interface
     hardware_interface::JointHandle jointPosHandle(jointStateHandle,
                                                    &jointPositionCmd_[i]);
     positionJointInterface_.registerHandle(jointPosHandle);
   }
+  // Connect and register the gripper state interface
+  hardware_interface::JointStateHandle jointStateHandle(
+      jointName[GRIPPER_ID], &jointPosition_[GRIPPER_ID],
+      &jointVelocity_[GRIPPER_ID], &jointEffort_[GRIPPER_ID]);
+  jointStateInterface_.registerHandle(jointStateHandle);
 
   registerInterface(&jointStateInterface_);
   registerInterface(&positionJointInterface_);
@@ -40,6 +44,17 @@ XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
 }
 
 XArmHardwareInterface::~XArmHardwareInterface() {}
+
+void XArmHardwareInterface::GripperCmdCallback(
+    const control_msgs::GripperCommandGoalConstPtr& goal) {
+  // Command is the distance of the gripper form its initial position
+  jointPositionCmd_[GRIPPER_ID] = goal->command.position;
+  // gripperCmdFeedback_.feedback.position = jointPosition_[5];
+
+  // if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
+  //   gripperCmdResult_.result.reached_goal = true;
+  // }
+}
 
 }  // namespace lobot_hardware_interface
 

@@ -8,6 +8,8 @@ project(lobot_ik)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  actionlib
+  control_msgs
   moveit_ros_planning_interface
   moveit_visual_tools
   roscpp
@@ -105,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lobot_ik
-#  CATKIN_DEPENDS moveit_ros_planning_interface moveit_visual_tools roscpp
+  CATKIN_DEPENDS actionlib control_msgs moveit_ros_planning_interface moveit_visual_tools roscpp
 #  DEPENDS system_lib
 )
 
@@ -134,6 +136,7 @@ add_library(xarm_ik
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(xarm_move_group_demo src/xarm_move_group_demo.cpp)
+add_executable(xarm_pick_place_demo src/xarm_pick_place_demo.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,6 +150,10 @@ add_executable(xarm_move_group_demo src/xarm_move_group_demo.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(xarm_move_group_demo
+  ${catkin_LIBRARIES}
+  xarm_ik
+)
+target_link_libraries(xarm_pick_place_demo
   ${catkin_LIBRARIES}
   xarm_ik
 )

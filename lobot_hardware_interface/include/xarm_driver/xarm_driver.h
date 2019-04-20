@@ -5,15 +5,15 @@
 #include <ros/ros.h>
 #include <array>
 #include <initializer_list>
-#include <memory>
 #include <vector>
 
 #include "hid/myhid.hpp"
 
 namespace lobot_hardware_interface {
 
-#define SERVO_NUM 6
-#define JOINT_NUM 5
+#define SERVO_NUM 6   // Number of servos
+#define JOINT_NUM 5   // Number of the arm joints
+#define GRIPPER_ID 5  // Index of the gripper joint
 
 #define CMD_MULT_SERVO_SPIN 3
 #define CMD_MULT_SERVO_POS_READ 21
@@ -25,7 +25,7 @@ class XArmDriver {
 
   void Execute(const std::array<double, SERVO_NUM>& cmd,
                const ros::Duration& period);
-  std::shared_ptr<std::array<double, SERVO_NUM>> GetJointState();
+  void GetJointState(std::array<double, SERVO_NUM>& currStateArray);
 
  private:
   MyHid myHid_;
@@ -49,34 +49,35 @@ inline void XArmDriver::Execute(const std::array<double, SERVO_NUM>& cmd,
   }
 
   // Command for gripper joint
-  // posCmdArray[JOINT_NUM] = 500;
+  auto gripperCmd = (0.03 - cmd[GRIPPER_ID]) * 2000;
+  posCmdArray[GRIPPER_ID] = -0.0031 * gripperCmd * gripperCmd * gripperCmd +
+                            0.2122 * gripperCmd * gripperCmd -
+                            10.3352 * gripperCmd + 700.9078;
 
   // Send commands
   SpinServos({2, 3, 4, 5, 6},
              {posCmdArray[4], posCmdArray[3], posCmdArray[2], posCmdArray[1],
               posCmdArray[0]},
              period.toSec() * 1000);
+  SpinServos({1}, {posCmdArray[5]}, 1500);
 }
 
-inline std::shared_ptr<std::array<double, SERVO_NUM>>
-XArmDriver::GetJointState() {
-  std::array<double, SERVO_NUM> currAngleArray;
-
+inline void XArmDriver::GetJointState(
+    std::array<double, SERVO_NUM>& currStateArray) {
   GetCurrentPosition();
 
   // State of arm joints, convert positions to radians
   for (std::size_t i = 1; i != SERVO_NUM; ++i) {
-    currAngleArray[JOINT_NUM - i] =
+    currStateArray[JOINT_NUM - i] =
         (i == 2 || i == 3) ? ((500 - currPosArray_[i]) * M_PI / 750)
                            : ((currPosArray_[i] - 500) * M_PI / 750);
   }
 
   // State of the gripper joint, mapped from angle to distance
-  currAngleArray[JOINT_NUM] = (0.0007 * currPosArray_[0] * currPosArray_[0] -
-                               0.1985 * currPosArray_[0] + 16.4504) /
-                              2000;
-
-  return std::make_shared<std::array<double, SERVO_NUM>>(currAngleArray);
+  currStateArray[GRIPPER_ID] =
+      0.03 - (-0.0006 * currPosArray_[0] * currPosArray_[0] +
+              0.1945 * currPosArray_[0] + 41.9166) /
+                 2000;
 }
 
 inline void XArmDriver::GetCurrentPosition() {
