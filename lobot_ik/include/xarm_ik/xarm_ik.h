@@ -21,7 +21,7 @@ class XArmIk {
 
   bool IsPoseReachable(const geometry_msgs::Pose& pose);
   bool RevisePose(geometry_msgs::Pose& pose);
-  bool SolveIk(const geometry_msgs::Point& p, const tf::Matrix3x3& r);
+  bool SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r);
 };
 
 inline bool XArmIk::IsPoseReachable(const geometry_msgs::Pose& pose) {
@@ -33,9 +33,7 @@ inline bool XArmIk::IsPoseReachable(const geometry_msgs::Pose& pose) {
 
   constexpr double threshold = 0.01;
 
-  if (pose.position.x == 0 &&
-      ((M_PI / 2 - threshold <= yaw && yaw <= M_PI / 2 + threshold) ||
-       (-M_PI / 2 - threshold <= yaw && yaw <= -M_PI / 2 + threshold))) {
+  if (pose.position.x == 0 && abs(cos(yaw)) > 0.99) {
     return true;
   }
 

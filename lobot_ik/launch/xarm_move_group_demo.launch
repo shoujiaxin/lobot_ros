@@ -1,0 +1,7 @@
+<launch>
+
+  <include file="$(find lobot_xarm)/launch/moveit.launch" />
+
+  <node name="xarm_move_group_demo" pkg="lobot_ik" type="xarm_move_group_demo" respawn="false" output="screen" />
+
+</launch>

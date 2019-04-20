@@ -32,7 +32,15 @@ bool XArmIk::SetPoseTarget(
   return true;
 }
 
-bool XArmIk::SolveIk(const geometry_msgs::Point& p, const tf::Matrix3x3& r) {
+bool XArmIk::SolveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r) {
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      if (abs(r[i][j]) < 1e-8) {
+        r[i][j] = 0;
+      }
+    }
+  }
+
   constexpr double a1 = 0.003;
   constexpr double a2 = 0.096;
   constexpr double a3 = 0.096;
