@@ -12,6 +12,8 @@ ROS packages for LOBOT xArm 5 DOF manipulator.
 
 - [ros_control - ROS Wiki](http://wiki.ros.org/ros_control)
 
+- libudev-dev
+
 ## Packages Summary
 
 ### [lobot_demo](lobot_demo)
@@ -53,6 +55,7 @@ Contains launch files to start simulation or real robot.
    ```shell
    sudo apt-get install ros-melodic-moveit
    sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
+   sudo apt-get install libudev-dev
    ```
 
 2. Clone this repository into your workspace
