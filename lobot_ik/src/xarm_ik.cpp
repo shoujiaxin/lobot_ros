@@ -5,9 +5,9 @@
 namespace lobot_ik {
 
 bool XArmIk::SetPoseTarget(
-    const geometry_msgs::Pose& p,
+    geometry_msgs::Pose pose,
     moveit::planning_interface::MoveGroupInterface& group) {
-  geometry_msgs::Pose pose = p;  // Make a copy of the pose
+  // Make a copy of the pose
   if (!IsPoseReachable(pose) && !RevisePose(pose)) {
     ROS_ERROR_NAMED("xarm_ik", "The target pose is not reachable");
     return false;

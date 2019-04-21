@@ -2,7 +2,6 @@
 #define MYHID_H
 
 #include <initializer_list>
-#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -25,7 +24,7 @@ class MyHid {
                      const std::initializer_list<unsigned> &argv);
   int MakeAndSendCmd(const unsigned cmd, const std::vector<unsigned> &argv);
   void Open();
-  std::shared_ptr<std::vector<unsigned>> Read(const size_t length);
+  void Read(std::vector<unsigned> &data, const size_t length);
   void SetProductId(const unsigned short pi) { productId = pi; }
   void SetVendorId(const unsigned short vi) { vendorId = vi; }
 
@@ -117,12 +116,12 @@ inline void MyHid::Open() {
   connected = true;
 }
 
-inline std::shared_ptr<std::vector<unsigned>> MyHid::Read(const size_t length) {
-  std::vector<unsigned> data;
-  data.reserve(length);
+inline void MyHid::Read(std::vector<unsigned> &data, const size_t length) {
   if (length > 256) {
-    return std::make_shared<std::vector<unsigned>>(data);
+    return;
   }
+
+  data.reserve(length);
   unsigned char recvBuff[256] = {0};
 
   hid_read(myDevice, recvBuff, length + 2);
@@ -134,7 +133,7 @@ inline std::shared_ptr<std::vector<unsigned>> MyHid::Read(const size_t length) {
       ++i;
     }
   }
-  return std::make_shared<std::vector<unsigned>>(data);
+  return;
 }
 
 #endif  // MYHID_H

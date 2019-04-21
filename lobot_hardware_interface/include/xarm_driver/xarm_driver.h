@@ -82,16 +82,16 @@ inline void XArmDriver::GetJointState(
 
 inline void XArmDriver::GetCurrentPosition() {
   myHid_.MakeAndSendCmd(CMD_MULT_SERVO_POS_READ, {SERVO_NUM, 1, 2, 3, 4, 5, 6});
-  auto recvDataVecPtr = myHid_.Read(21);
+  std::vector<unsigned> recvData;
+  myHid_.Read(recvData, 21);
 
-  if (recvDataVecPtr->size() != 0 &&
-      recvDataVecPtr->at(0) == CMD_MULT_SERVO_POS_READ &&
-      recvDataVecPtr->at(1) == SERVO_NUM) {
+  if (recvData.size() != 0 && recvData[0] == CMD_MULT_SERVO_POS_READ &&
+      recvData[1] == SERVO_NUM) {
     auto currPos = currPosArray_.begin();
-    decltype(recvDataVecPtr->size()) i = 0;
+    decltype(recvData.size()) i = 0;
     while (currPos != currPosArray_.end()) {
-      *currPos = static_cast<int>(recvDataVecPtr->at(3 * i + 3)) +
-                 static_cast<int>(recvDataVecPtr->at(3 * i + 4) << 8);
+      *currPos = static_cast<int>(recvData[3 * i + 3]) +
+                 static_cast<int>(recvData[3 * i + 4] << 8);
       ++currPos;
       ++i;
     }

@@ -13,7 +13,7 @@ class XArmIk {
  public:
   XArmIk() = default;
 
-  bool SetPoseTarget(const geometry_msgs::Pose& p,
+  bool SetPoseTarget(geometry_msgs::Pose pose,
                      moveit::planning_interface::MoveGroupInterface& group);
 
  private:
