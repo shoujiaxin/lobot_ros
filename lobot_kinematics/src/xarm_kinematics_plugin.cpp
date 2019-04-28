@@ -459,45 +459,20 @@ bool XArmKinematicsPlugin::SolveIk(const geometry_msgs::Point &p,
             c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 +
             s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
+  solution.resize(JOINT_NUM);
+  solution[4] = t1;                                // arm_joint5
+  solution[3] = t2 + M_PI / 2;                     // arm_joint4
+  solution[2] = t3;                                // arm_joint3
+  solution[1] = t4 + M_PI / 2;                     // arm_joint2
+  solution[0] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint1
+
   // Check joints' limit
-  if (lowerLimits_[0] < t1 && t1 < upperLimits_[0]) {
-    solution[0] = t1;
-  } else {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                    "The value of joint 1 is out of bounds");
-    return false;
-  }
-
-  if (lowerLimits_[1] < t2 && t2 < upperLimits_[1]) {
-    solution[1] = t2 + M_PI / 2;
-  } else {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                    "The value of joint 2 is out of bounds");
-    return false;
-  }
-
-  if (lowerLimits_[2] < t3 && t3 < upperLimits_[2]) {
-    solution[2] = t3;
-  } else {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                    "The value of joint 3 is out of bounds");
-    return false;
-  }
-
-  if (lowerLimits_[3] < t4 && t4 < upperLimits_[3]) {
-    solution[3] = t4 + M_PI / 2;
-  } else {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                    "The value of joint 4 is out of bounds");
-    return false;
-  }
-
-  if (lowerLimits_[4] < t5 && t5 < upperLimits_[4]) {
-    solution[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;
-  } else {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                    "The value of joint 5 is out of bounds");
-    return false;
+  for (int i = 0; i < JOINT_NUM; ++i) {
+    if (solution[i] < lowerLimits_[i] || solution[i] > upperLimits_[i]) {
+      ROS_ERROR_NAMED("xarm_kinematics_plugin",
+                      "The value of arm_joint%d is out of bounds", i + 1);
+      return false;
+    }
   }
 
   return true;

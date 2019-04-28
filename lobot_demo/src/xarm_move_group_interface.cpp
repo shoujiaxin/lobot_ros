@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   targetPose1.position.y = 0;
   targetPose1.position.z = 0.15;
   targetPose1.orientation =
-      tf::createQuaternionMsgFromRollPitchYaw(M_PI / 6, M_PI / 2, 0);
+      tf::createQuaternionMsgFromRollPitchYaw(M_PI / 6, M_PI / 4, 0);
   moveGroup.setJointValueTarget(targetPose1);
   bool success = (moveGroup.asyncMove() ==
                   moveit::planning_interface::MoveItErrorCode::SUCCESS);
