@@ -76,6 +76,16 @@ class XArmKinematicsPlugin : public kinematics::KinematicsBase {
 
   std::vector<double> lowerLimits_;
   std::vector<double> upperLimits_;
+
+  bool IsPoseReachable(const geometry_msgs::Pose &pose) const;
+
+  void QuaternionToRPY(const geometry_msgs::Quaternion &q, double &roll,
+                       double &pitch, double &yaw) const;
+
+  bool RevisePose(geometry_msgs::Pose &pose) const;
+
+  bool SolveIk(const geometry_msgs::Point &p, tf::Matrix3x3 &r,
+               std::vector<double> &solution) const;
 };
 
 }  // namespace xarm_kinematics_plugin
