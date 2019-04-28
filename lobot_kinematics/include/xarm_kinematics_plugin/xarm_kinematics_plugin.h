@@ -5,86 +5,77 @@
 #include <ros/ros.h>
 #include <tf/tf.h>
 
-#define JOINT_NUM 5
-
 namespace xarm_kinematics_plugin {
+
+#define JOINT_NUM 5
 
 class XArmKinematicsPlugin : public kinematics::KinematicsBase {
  public:
-  XArmKinematicsPlugin() : initialized_(false) {}
+  XArmKinematicsPlugin();
   ~XArmKinematicsPlugin();
 
-  bool getPositionIK(const geometry_msgs::Pose& ik_pose,
-                     const std::vector<double>& ik_seed_state,
-                     std::vector<double>& solution,
-                     moveit_msgs::MoveItErrorCodes& error_code,
-                     const kinematics::KinematicsQueryOptions& options =
+  const std::vector<std::string> &getJointNames() const override {
+    return jointNames_;
+  }
+
+  const std::vector<std::string> &getLinkNames() const override {
+    return linkNames_;
+  }
+
+  bool getPositionFK(const std::vector<std::string> &link_names,
+                     const std::vector<double> &joint_angles,
+                     std::vector<geometry_msgs::Pose> &poses) const override;
+
+  bool getPositionIK(const geometry_msgs::Pose &ik_pose,
+                     const std::vector<double> &ik_seed_state,
+                     std::vector<double> &solution,
+                     moveit_msgs::MoveItErrorCodes &error_code,
+                     const kinematics::KinematicsQueryOptions &options =
                          kinematics::KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose,
-      const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options =
-          kinematics::KinematicsQueryOptions()) const override;
-
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose,
-      const std::vector<double>& ik_seed_state, double timeout,
-      const std::vector<double>& consistency_limits,
-      std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options =
-          kinematics::KinematicsQueryOptions()) const override;
-
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose,
-      const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback,
-      moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options =
-          kinematics::KinematicsQueryOptions()) const override;
-
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose,
-      const std::vector<double>& ik_seed_state, double timeout,
-      const std::vector<double>& consistency_limits,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback,
-      moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options =
-          kinematics::KinematicsQueryOptions()) const override;
-
-  bool getPositionFK(const std::vector<std::string>& link_names,
-                     const std::vector<double>& joint_angles,
-                     std::vector<geometry_msgs::Pose>& poses) const override;
-
-  bool initialize(const moveit::core::RobotModel& robot_model,
-                  const std::string& group_name, const std::string& base_frame,
-                  const std::vector<std::string>& tip_frames,
+  bool initialize(const std::string &robot_description,
+                  const std::string &group_name, const std::string &base_frame,
+                  const std::string &tip_frame,
                   double search_discretization) override;
 
-  const std::vector<std::string>& getJointNames() const override;
+  bool searchPositionIK(
+      const geometry_msgs::Pose &ik_pose,
+      const std::vector<double> &ik_seed_state, double timeout,
+      std::vector<double> &solution, moveit_msgs::MoveItErrorCodes &error_code,
+      const kinematics::KinematicsQueryOptions &options =
+          kinematics::KinematicsQueryOptions()) const override;
 
-  const std::vector<std::string>& getLinkNames() const override;
+  bool searchPositionIK(
+      const geometry_msgs::Pose &ik_pose,
+      const std::vector<double> &ik_seed_state, double timeout,
+      const std::vector<double> &consistency_limits,
+      std::vector<double> &solution, moveit_msgs::MoveItErrorCodes &error_code,
+      const kinematics::KinematicsQueryOptions &options =
+          kinematics::KinematicsQueryOptions()) const override;
 
- protected:
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose,
-                        const std::vector<double>& ik_seed_state,
-                        double timeout, std::vector<double>& solution,
-                        const IKCallbackFn& solution_callback,
-                        moveit_msgs::MoveItErrorCodes& error_code,
-                        const std::vector<double>& consistency_limits,
-                        const kinematics::KinematicsQueryOptions& options =
-                            kinematics::KinematicsQueryOptions()) const;
+  bool searchPositionIK(
+      const geometry_msgs::Pose &ik_pose,
+      const std::vector<double> &ik_seed_state, double timeout,
+      std::vector<double> &solution, const IKCallbackFn &solution_callback,
+      moveit_msgs::MoveItErrorCodes &error_code,
+      const kinematics::KinematicsQueryOptions &options =
+          kinematics::KinematicsQueryOptions()) const override;
+
+  bool searchPositionIK(
+      const geometry_msgs::Pose &ik_pose,
+      const std::vector<double> &ik_seed_state, double timeout,
+      const std::vector<double> &consistency_limits,
+      std::vector<double> &solution, const IKCallbackFn &solution_callback,
+      moveit_msgs::MoveItErrorCodes &error_code,
+      const kinematics::KinematicsQueryOptions &options =
+          kinematics::KinematicsQueryOptions()) const override;
 
  private:
-  bool initialized_;  // Internal variable that indicates whether solver is
-                      // configured and ready
-  unsigned int dimension_;  // Dimension of the group
+  std::vector<std::string> jointNames_;
+  std::vector<std::string> linkNames_;
 
-  bool isPoseReachable(const geometry_msgs::Pose& pose) const;
-  bool revisePose(geometry_msgs::Pose& pose) const;
-  bool solveIK(const geometry_msgs::Point& p, const tf::Matrix3x3& r,
-               std::vector<double>& solution) const;
+  std::vector<double> lowerLimits_;
+  std::vector<double> upperLimits_;
 };
 
 }  // namespace xarm_kinematics_plugin
