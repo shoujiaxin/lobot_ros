@@ -47,13 +47,35 @@ XArmHardwareInterface::~XArmHardwareInterface() {}
 
 void XArmHardwareInterface::GripperCmdCallback(
     const control_msgs::GripperCommandGoalConstPtr& goal) {
-  // Command is the distance of the gripper form its initial position
-  jointPositionCmd_[GRIPPER_ID] = goal->command.position;
-  // gripperCmdFeedback_.feedback.position = jointPosition_[5];
+  int timeToExecute = 1500;
+  constexpr unsigned short freq = 50;
+  ros::Rate r(freq);
 
-  // if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
-  //   gripperCmdResult_.result.reached_goal = true;
-  // }
+  while (timeToExecute > 0) {
+    // Check that if preempt is requested by client
+    if (gripperCmdServer_.isPreemptRequested() || !ros::ok()) {
+      jointPositionCmd_[GRIPPER_ID] = jointPosition_[5];  // Stop moving
+      ROS_INFO_NAMED("xarm_hardware_interface", "%s: Preempted");
+      // Set the action state to preempted
+      gripperCmdServer_.setPreempted();
+      break;
+    }
+
+    // Command is the distance of the gripper form its initial position
+    jointPositionCmd_[GRIPPER_ID] = goal->command.position;
+    // Publish feedback
+    gripperCmdFeedback_.position = jointPosition_[5];
+    gripperCmdServer_.publishFeedback(gripperCmdFeedback_);
+
+    timeToExecute -= 1000 / freq;
+    r.sleep();
+  }
+
+  if (abs(goal->command.position - jointPosition_[5]) < 0.005) {
+    gripperCmdServer_.setSucceeded(gripperCmdResult_);
+  } else {
+    gripperCmdServer_.setAborted(gripperCmdResult_);
+  }
 }
 
 }  // namespace lobot_hardware_interface

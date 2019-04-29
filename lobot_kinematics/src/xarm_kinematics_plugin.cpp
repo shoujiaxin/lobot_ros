@@ -470,7 +470,8 @@ bool XArmKinematicsPlugin::SolveIk(const geometry_msgs::Point &p,
   for (int i = 0; i < JOINT_NUM; ++i) {
     if (solution[i] < lowerLimits_[i] || solution[i] > upperLimits_[i]) {
       ROS_ERROR_NAMED("xarm_kinematics_plugin",
-                      "The value of arm_joint%d is out of bounds", i + 1);
+                      "The value of arm_joint%d (%f) is out of bounds", i + 1,
+                      solution[i]);
       return false;
     }
   }

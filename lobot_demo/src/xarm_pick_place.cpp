@@ -36,13 +36,12 @@ int main(int argc, char** argv) {
   visualTools.prompt(
       "Press 'next' in the RvizVisualToolsGui to start plan to target pose 1");
   geometry_msgs::Pose targetPose1;
-  targetPose1.position.x = 0.1;
+  targetPose1.position.x = 0.22;
   targetPose1.position.y = 0;
-  targetPose1.position.z = 0.15;
-  targetPose1.orientation =
-      tf::createQuaternionMsgFromRollPitchYaw(0, M_PI / 4, 0);
+  targetPose1.position.z = 0.04;
+  targetPose1.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   moveGroup.setJointValueTarget(targetPose1);
-  bool success = (moveGroup.asyncMove() ==
+  bool success = (moveGroup.move() ==
                   moveit::planning_interface::MoveItErrorCode::SUCCESS);
   ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 (pose goal) %s",
                  success ? "" : "FAILED");
@@ -57,12 +56,12 @@ int main(int argc, char** argv) {
       "Press 'next' in the RvizVisualToolsGui to start plan to target pose 1");
   geometry_msgs::Pose targetPose2;
   targetPose2.position.x = 0;
-  targetPose2.position.y = 0.1;
-  targetPose2.position.z = 0.1;
+  targetPose2.position.y = 0.18;
+  targetPose2.position.z = 0.05;
   targetPose2.orientation =
       tf::createQuaternionMsgFromRollPitchYaw(0, M_PI / 4, 0);
   moveGroup.setJointValueTarget(targetPose2);
-  success = (moveGroup.asyncMove() ==
+  success = (moveGroup.move() ==
              moveit::planning_interface::MoveItErrorCode::SUCCESS);
   ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 (pose goal) %s",
                  success ? "" : "FAILED");

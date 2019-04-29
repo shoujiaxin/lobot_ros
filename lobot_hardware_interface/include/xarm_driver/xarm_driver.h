@@ -44,15 +44,15 @@ inline void XArmDriver::Execute(const std::array<double, SERVO_NUM>& cmd,
 
   // Commands for arm joints, convert radians to positions
   for (std::size_t i = 0; i != JOINT_NUM; ++i) {
-    posCmdArray[i] = (i == 2 || i == 3) ? (500 - 750 * cmd[i] / M_PI)
-                                        : (500 + 750 * cmd[i] / M_PI);
+    posCmdArray[i] =
+        (i == 1) ? (500 - 750 * cmd[i] / M_PI) : (500 + 750 * cmd[i] / M_PI);
   }
 
   // Command for gripper joint
   auto gripperCmd = (0.03 - cmd[GRIPPER_ID]) * 2000;
-  posCmdArray[GRIPPER_ID] = -0.0031 * gripperCmd * gripperCmd * gripperCmd +
-                            0.2122 * gripperCmd * gripperCmd -
-                            10.3352 * gripperCmd + 700.9078;
+  posCmdArray[GRIPPER_ID] = -0.003073 * gripperCmd * gripperCmd * gripperCmd +
+                            0.212188 * gripperCmd * gripperCmd -
+                            10.335171 * gripperCmd + 700.907820;
 
   // Send commands
   SpinServos({2, 3, 4, 5, 6},
@@ -69,14 +69,14 @@ inline void XArmDriver::GetJointState(
   // State of arm joints, convert positions to radians
   for (std::size_t i = 1; i != SERVO_NUM; ++i) {
     currStateArray[JOINT_NUM - i] =
-        (i == 2 || i == 3) ? ((500 - currPosArray_[i]) * M_PI / 750)
-                           : ((currPosArray_[i] - 500) * M_PI / 750);
+        (i == 4) ? ((500 - currPosArray_[i]) * M_PI / 750)
+                 : ((currPosArray_[i] - 500) * M_PI / 750);
   }
 
   // State of the gripper joint, mapped from angle to distance
   currStateArray[GRIPPER_ID] =
-      0.03 - (-0.0006 * currPosArray_[0] * currPosArray_[0] +
-              0.1945 * currPosArray_[0] + 41.9166) /
+      0.03 - (-1.213930e-4 * currPosArray_[0] * currPosArray_[0] -
+              0.015326 * currPosArray_[0] + 67.610949) /
                  2000;
 }
 

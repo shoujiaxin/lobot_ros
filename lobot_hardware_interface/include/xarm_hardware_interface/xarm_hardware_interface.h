@@ -46,8 +46,8 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   // Gripper control
   actionlib::SimpleActionServer<control_msgs::GripperCommandAction>
       gripperCmdServer_;
-  control_msgs::GripperCommandActionFeedback gripperCmdFeedback_;
-  control_msgs::GripperCommandActionResult gripperCmdResult_;
+  control_msgs::GripperCommandFeedback gripperCmdFeedback_;
+  control_msgs::GripperCommandResult gripperCmdResult_;
 
   void GripperCmdCallback(const control_msgs::GripperCommandGoalConstPtr& goal);
 };
