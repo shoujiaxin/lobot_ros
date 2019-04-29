@@ -52,15 +52,12 @@
   <build_depend>moveit_core</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>urdf</build_depend>
   <build_export_depend>moveit_core</build_export_depend>
   <build_export_depend>pluginlib</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>urdf</build_export_depend>
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <exec_depend>urdf</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -1,7 +1,7 @@
 #include "xarm_kinematics_plugin/xarm_kinematics_plugin.h"
 
+#include <moveit/robot_model/robot_model.h>
 #include <pluginlib/class_list_macros.h>
-#include <urdf/model.h>
 
 namespace xarm_kinematics_plugin {
 
@@ -34,46 +34,39 @@ bool XArmKinematicsPlugin::getPositionIK(
                           error_code, options);
 }
 
-bool XArmKinematicsPlugin::initialize(const std::string &robot_description,
-                                      const std::string &group_name,
-                                      const std::string &base_frame,
-                                      const std::string &tip_frame,
-                                      double search_discretization) {
-  setValues(robot_description, group_name, base_frame, tip_frame,
+bool XArmKinematicsPlugin::initialize(
+    const moveit::core::RobotModel &robot_model, const std::string &group_name,
+    const std::string &base_frame, const std::vector<std::string> &tip_frames,
+    double search_discretization) {
+  setValues(robot_model.getName(), group_name, base_frame, tip_frames,
             search_discretization);
 
-  urdf::Model robotModel;
-  robotModel.initParam(robot_description);
+  auto linkModels = robot_model.getLinkModels();
+  for (auto link : linkModels) {
+    if (link->getName() == tip_frames_.at(0)) {
+      break;
+    }
 
-  auto link = robotModel.getLink(tip_frame);
-  if (!link) {
-    return false;
-  }
+    linkNames_.push_back(link->getName());
 
-  while (link && link->name != base_frame) {
-    linkNames_.push_back(link->name);
-    auto joint = link->parent_joint;
-    if (!joint || joint->type == urdf::Joint::UNKNOWN ||
-        joint->type == urdf::Joint::FIXED) {
-      link = link->getParent();
+    auto joint = link->getParentJointModel();
+    if (!joint ||
+        joint->getType() == moveit::core::JointModel::JointType::UNKNOWN ||
+        joint->getType() == moveit::core::JointModel::JointType::FIXED) {
       continue;
     }
 
-    jointNames_.push_back(joint->name);
-    if (joint->type != urdf::Joint::CONTINUOUS) {
-      if (joint->safety) {
-        lowerLimits_.push_back(joint->safety->soft_lower_limit);
-        upperLimits_.push_back(joint->safety->soft_upper_limit);
-      } else {
-        lowerLimits_.push_back(joint->limits->lower);
-        upperLimits_.push_back(joint->limits->upper);
-      }
+    jointNames_.push_back(joint->getName());
+
+    if (joint->getType() == moveit::core::JointModel::JointType::REVOLUTE ||
+        joint->getType() == moveit::core::JointModel::JointType::PRISMATIC) {
+      auto bounds = joint->getVariableBounds();
+      lowerLimits_.push_back(bounds.at(0).min_position_);
+      upperLimits_.push_back(bounds.at(0).max_position_);
     } else {
       lowerLimits_.push_back(-M_PI);
       upperLimits_.push_back(M_PI);
     }
-
-    link = link->getParent();
   }
 
   return true;
@@ -460,11 +453,11 @@ bool XArmKinematicsPlugin::SolveIk(const geometry_msgs::Point &p,
             s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
   solution.resize(JOINT_NUM);
-  solution[4] = t1;                                // arm_joint5
-  solution[3] = t2 + M_PI / 2;                     // arm_joint4
+  solution[0] = t1;                                // arm_joint5
+  solution[1] = t2 + M_PI / 2;                     // arm_joint4
   solution[2] = t3;                                // arm_joint3
-  solution[1] = t4 + M_PI / 2;                     // arm_joint2
-  solution[0] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint1
+  solution[3] = t4 + M_PI / 2;                     // arm_joint2
+  solution[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint1
 
   // Check joints' limit
   for (int i = 0; i < JOINT_NUM; ++i) {

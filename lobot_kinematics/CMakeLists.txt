@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_core
   pluginlib
   roscpp
-  urdf
 )
 
 ## System dependencies are found with CMake's conventions

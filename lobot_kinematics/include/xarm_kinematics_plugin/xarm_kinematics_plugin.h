@@ -33,9 +33,9 @@ class XArmKinematicsPlugin : public kinematics::KinematicsBase {
                      const kinematics::KinematicsQueryOptions &options =
                          kinematics::KinematicsQueryOptions()) const override;
 
-  bool initialize(const std::string &robot_description,
+  bool initialize(const moveit::core::RobotModel &robot_model,
                   const std::string &group_name, const std::string &base_frame,
-                  const std::string &tip_frame,
+                  const std::vector<std::string> &tip_frames,
                   double search_discretization) override;
 
   bool searchPositionIK(
