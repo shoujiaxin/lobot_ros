@@ -1,0 +1,8 @@
+<launch>
+
+  <!-- Launch the real robot -->
+  <include file="$(find lobot_xarm)/launch/moveit.launch" />
+
+  <node name="xarm_pick_place" pkg="lobot_demo" type="xarm_pick_place" respawn="false" output="screen" />
+
+</launch>
