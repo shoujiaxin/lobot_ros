@@ -36,6 +36,8 @@ Provides USB-HID driver of xArm and hardware interface for ros_control.
 
 An implementation of inverse kinematics solution for 5 DOF manipulator.
 
+*(This package is deprecated, only reserved for reference.)*
+
 ### [lobot_kinematics](lobot_kinematics)
 
 Kinematics plugin for moveit.

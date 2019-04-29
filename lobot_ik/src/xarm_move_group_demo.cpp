@@ -11,6 +11,10 @@ int main(int argc, char** argv) {
 
   spinner.start();
 
+  ROS_WARN_NAMED(
+      "xarm_move_group_demo",
+      "Package lobot_ik is deprecated, pleause use lobot_kinematics instead");
+
   moveit_visual_tools::MoveItVisualTools visualTools("bask_link");
   moveit::planning_interface::MoveGroupInterface moveGroup("xarm_arm");
   moveit::planning_interface::MoveGroupInterface::Plan myPlan;
