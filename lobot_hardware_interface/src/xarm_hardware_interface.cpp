@@ -47,7 +47,7 @@ XArmHardwareInterface::~XArmHardwareInterface() {}
 
 void XArmHardwareInterface::GripperCmdCallback(
     const control_msgs::GripperCommandGoalConstPtr& goal) {
-  int timeToExecute = 1500;
+  int timeToExecute = 3000;  // Wait for 3 seconds
   constexpr unsigned short freq = 50;
   ros::Rate r(freq);
 
@@ -71,7 +71,7 @@ void XArmHardwareInterface::GripperCmdCallback(
     r.sleep();
   }
 
-  if (abs(goal->command.position - jointPosition_[5]) < 0.005) {
+  if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
     gripperCmdServer_.setSucceeded(gripperCmdResult_);
   } else {
     gripperCmdServer_.setAborted(gripperCmdResult_);

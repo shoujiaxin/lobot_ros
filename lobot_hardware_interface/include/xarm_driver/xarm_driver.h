@@ -59,7 +59,7 @@ inline void XArmDriver::Execute(const std::array<double, SERVO_NUM>& cmd,
              {posCmdArray[4], posCmdArray[3], posCmdArray[2], posCmdArray[1],
               posCmdArray[0]},
              period.toSec() * 1000);
-  SpinServos({1}, {posCmdArray[5]}, 1500);
+  SpinServos({1}, {posCmdArray[5]}, 600);
 }
 
 inline void XArmDriver::GetJointState(
