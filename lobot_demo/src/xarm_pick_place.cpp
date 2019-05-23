@@ -51,25 +51,27 @@ int main(int argc, char** argv) {
   goal.command.position = 0.025;
   gripperCmdAC.sendGoal(goal);
 
-  // Plan & move the arm
-  visualTools.prompt(
-      "Press 'next' in the RvizVisualToolsGui to start plan to target pose 1");
-  geometry_msgs::Pose targetPose2;
-  targetPose2.position.x = 0;
-  targetPose2.position.y = 0.18;
-  targetPose2.position.z = 0.05;
-  targetPose2.orientation =
-      tf::createQuaternionMsgFromRollPitchYaw(0, M_PI / 4, 0);
-  moveGroup.setJointValueTarget(targetPose2);
-  success = (moveGroup.move() ==
-             moveit::planning_interface::MoveItErrorCode::SUCCESS);
-  ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 (pose goal) %s",
-                 success ? "" : "FAILED");
-  ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 as trajectory line");
+  bool result = gripperCmdAC.waitForResult(ros::Duration(3));
+  if (result && gripperCmdAC.getState() ==
+                    actionlib::SimpleClientGoalState::StateEnum::SUCCEEDED) {
+    // Plan & move the arm
+    geometry_msgs::Pose targetPose2;
+    targetPose2.position.x = 0;
+    targetPose2.position.y = 0.18;
+    targetPose2.position.z = 0.05;
+    targetPose2.orientation =
+        tf::createQuaternionMsgFromRollPitchYaw(0, M_PI / 4, 0);
+    moveGroup.setJointValueTarget(targetPose2);
+    success = (moveGroup.move() ==
+               moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 (pose goal) %s",
+                   success ? "" : "FAILED");
+    ROS_INFO_NAMED("xarm_pick_place", "Visualizing plan 1 as trajectory line");
 
-  // Open the gripper
-  goal.command.position = 0.0;
-  gripperCmdAC.sendGoal(goal);
+    // Open the gripper
+    goal.command.position = 0.0;
+    gripperCmdAC.sendGoal(goal);
+  }
 
   return 0;
 }

@@ -137,6 +137,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(xarm_move_group_interface src/xarm_move_group_interface.cpp)
 add_executable(xarm_pick_place src/xarm_pick_place.cpp)
+add_executable(xarm_trajectory_plan src/xarm_trajectory_plan.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,6 +154,9 @@ target_link_libraries(xarm_move_group_interface
   ${catkin_LIBRARIES}
 )
 target_link_libraries(xarm_pick_place
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(xarm_trajectory_plan
   ${catkin_LIBRARIES}
 )
 
