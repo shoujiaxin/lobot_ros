@@ -55,7 +55,7 @@ Contains launch files to start simulation or real robot.
 1. Install all dependences
 
    ```shell
-   sudo apt-get install ros-melodic-moveit
+   sudo apt-get install ros-melodic-moveit ros-melodic-moveit-visual-tools
    sudo apt-get install ros-melodic-ros-control ros-melodic-ros-controllers
    sudo apt-get install libudev-dev
    ```
