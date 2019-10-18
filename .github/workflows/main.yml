@@ -1,0 +1,23 @@
+name: ROS C++ CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag shoujiaxin/ros:lobot
+
+      - name: catkin_make
+        run: docker run --rm -v "$GITHUB_WORKSPACE":"/workspace/src/lobot_ros" -w "/workspace" shoujiaxin/ros:lobot catkin_make
