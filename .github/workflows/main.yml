@@ -1,4 +1,4 @@
-name: ROS C++ CI
+name: ROS catkin_make
 
 on:
   push:

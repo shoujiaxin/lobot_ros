@@ -1,5 +1,7 @@
 # lobot_ros
 
+![](https://github.com/shoujiaxin/lobot_ros/workflows/ROS%20catkin_make/badge.svg)
+
 ROS packages for LOBOT xArm 5 DOF manipulator.
 
 - OS: Ubuntu 18.04.2 LTS
