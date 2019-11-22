@@ -453,11 +453,18 @@ bool XArmKinematicsPlugin::SolveIk(const geometry_msgs::Point &p,
             s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
   solution.resize(JOINT_NUM);
-  solution[0] = t1;                                // arm_joint5
-  solution[1] = t2 + M_PI / 2;                     // arm_joint4
+  solution[0] = t1;                                // arm_joint1
+  solution[1] = t2 + M_PI / 2;                     // arm_joint2
   solution[2] = t3;                                // arm_joint3
-  solution[3] = t4 + M_PI / 2;                     // arm_joint2
-  solution[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint1
+  solution[3] = t4 + M_PI / 2;                     // arm_joint4
+  solution[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint5
+
+  // Workaround to aviod crash
+  for (const auto &s : solution) {
+    if (std::isnan(s)) {
+      return false;
+    }
+  }
 
   // Check joints' limit
   for (int i = 0; i < JOINT_NUM; ++i) {

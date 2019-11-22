@@ -62,15 +62,17 @@ Contains launch files to start simulation or real robot.
 
 2. Clone this repository into your workspace
 
-3. Build the workspace with `catkin_make`
+3. Open and build the workspace with `catkin_make`
 
-4. For simulation, you can simply start with
+4. Source the `./devel/setup.bash` or `./devel/setup.zsh`, depending on which shell you are using.
+
+5. For simulation, you can simply start with
 
    ```shell
    roslaunch lobot_xarm moveit_gazebo.launch
    ```
 
-5. For real robot, you need to get the USB device permission first.
+6. For real robot, you need to get the USB device permission first.
 
    ```shell
    sudo chmod 666 /dev/hidraw*

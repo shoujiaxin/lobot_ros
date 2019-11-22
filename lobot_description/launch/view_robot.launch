@@ -9,7 +9,7 @@
   <!-- Start joint state publisher node which will publish joint values -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <!-- Start robot state publisher node which will publish TF -->
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
   <!-- Launch visualization in rviz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find lobot_description)/view_robot.rviz -f base_link" required="true" />
