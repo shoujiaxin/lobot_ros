@@ -3,89 +3,92 @@
 
 #include "xarm_hardware_interface/xarm_hardware_interface.h"
 
-namespace lobot_hardware_interface {
-
-XArmHardwareInterface::XArmHardwareInterface(ros::NodeHandle& nh)
-    : nh_(nh),
-      controllerManager_(this),
-      gripperCmdServer_(
-          nh, "xarm_gripper_command",
-          boost::bind(&XArmHardwareInterface::GripperCmdCallback, this, _1),
-          false) {
+namespace lobot_hardware_interface
+{
+XarmHardwareInterface::XarmHardwareInterface(ros::NodeHandle& nh)
+  : nh_(nh)
+  , controller_manager_(this)
+  , gripper_cmd_action_server_(nh, "xarm_gripper_command",
+                               boost::bind(&XarmHardwareInterface::gripperCmdCallback, this, _1), false)
+{
   // Names of arm joints
-  const std::array<std::string, SERVO_NUM> jointName{
-      "arm_joint1", "arm_joint2", "arm_joint3",
-      "arm_joint4", "arm_joint5", "gripper_joint1"};
+  const std::array<std::string, SERVO_NUM> joint_names{ "arm_joint1", "arm_joint2", "arm_joint3",
+                                                        "arm_joint4", "arm_joint5", "gripper_joint1" };
 
   // Connect and register the joint state & position interface
-  for (int i = 0; i != JOINT_NUM; ++i) {
-    hardware_interface::JointStateHandle jointStateHandle(
-        jointName[i], &jointPosition_[i], &jointVelocity_[i], &jointEffort_[i]);
-    jointStateInterface_.registerHandle(jointStateHandle);
+  for (auto i = 0; i != JOINT_NUM; ++i)
+  {
+    hardware_interface::JointStateHandle jointStateHandle(joint_names[i], &joint_positions_[i], &joint_velocities_[i],
+                                                          &joint_efforts_[i]);
+    joint_state_interface_.registerHandle(jointStateHandle);
 
-    hardware_interface::JointHandle jointPosHandle(jointStateHandle,
-                                                   &jointPositionCmd_[i]);
-    positionJointInterface_.registerHandle(jointPosHandle);
+    hardware_interface::JointHandle jointPosHandle(jointStateHandle, &joint_position_cmds_[i]);
+    position_joint_interface_.registerHandle(jointPosHandle);
   }
   // Connect and register the gripper state interface
-  hardware_interface::JointStateHandle jointStateHandle(
-      jointName[GRIPPER_ID], &jointPosition_[GRIPPER_ID],
-      &jointVelocity_[GRIPPER_ID], &jointEffort_[GRIPPER_ID]);
-  jointStateInterface_.registerHandle(jointStateHandle);
+  hardware_interface::JointStateHandle jointStateHandle(joint_names[GRIPPER_ID], &joint_positions_[GRIPPER_ID],
+                                                        &joint_velocities_[GRIPPER_ID], &joint_efforts_[GRIPPER_ID]);
+  joint_state_interface_.registerHandle(jointStateHandle);
 
-  registerInterface(&jointStateInterface_);
-  registerInterface(&positionJointInterface_);
+  registerInterface(&joint_state_interface_);
+  registerInterface(&position_joint_interface_);
 
-  timer = nh.createTimer(
-      ros::Duration(0.1),
-      &lobot_hardware_interface::XArmHardwareInterface::update, this);
+  timer = nh.createTimer(ros::Duration(0.1), &lobot_hardware_interface::XarmHardwareInterface::update, this);
 
-  gripperCmdServer_.start();
+  gripper_cmd_action_server_.start();
 }
 
-XArmHardwareInterface::~XArmHardwareInterface() {}
+XarmHardwareInterface::~XarmHardwareInterface()
+{
+}
 
-void XArmHardwareInterface::GripperCmdCallback(
-    const control_msgs::GripperCommandGoalConstPtr& goal) {
-  int timeToExecute = 3000;  // Wait for 3 seconds
+void XarmHardwareInterface::gripperCmdCallback(const control_msgs::GripperCommandGoalConstPtr& goal)
+{
+  int time_to_execute = 3000;  // Wait for 3 seconds
   constexpr unsigned short freq = 50;
   ros::Rate r(freq);
 
-  while (timeToExecute > 0) {
+  while (time_to_execute > 0)
+  {
     // Check that if preempt is requested by client
-    if (gripperCmdServer_.isPreemptRequested() || !ros::ok()) {
-      jointPositionCmd_[GRIPPER_ID] = jointPosition_[5];  // Stop moving
+    if (gripper_cmd_action_server_.isPreemptRequested() || !ros::ok())
+    {
+      joint_position_cmds_[GRIPPER_ID] = joint_positions_[5];  // Stop moving
       ROS_INFO_NAMED("xarm_hardware_interface", "%s: Preempted");
       // Set the action state to preempted
-      gripperCmdServer_.setPreempted();
+      gripper_cmd_action_server_.setPreempted();
       break;
     }
 
     // Command is the distance of the gripper form its initial position
-    jointPositionCmd_[GRIPPER_ID] = goal->command.position;
+    joint_position_cmds_[GRIPPER_ID] = goal->command.position;
     // Publish feedback
-    gripperCmdFeedback_.position = jointPosition_[5];
-    gripperCmdServer_.publishFeedback(gripperCmdFeedback_);
+    gripper_cmd_feedback_.position = joint_positions_[5];
+    gripper_cmd_action_server_.publishFeedback(gripper_cmd_feedback_);
 
-    timeToExecute -= 1000 / freq;
+    time_to_execute -= 1000 / freq;
     r.sleep();
   }
 
-  if (abs(goal->command.position - jointPosition_[5]) < 0.01) {
-    gripperCmdServer_.setSucceeded(gripperCmdResult_);
-  } else {
-    gripperCmdServer_.setAborted(gripperCmdResult_);
+  if (abs(goal->command.position - joint_positions_[5]) < 0.01)
+  {
+    gripper_cmd_action_server_.setSucceeded(gripper_cmd_result_);
+  }
+  else
+  {
+    gripper_cmd_action_server_.setAborted(gripper_cmd_result_);
   }
 }
 
 }  // namespace lobot_hardware_interface
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   ros::init(argc, argv, "xarm_hardware_interface");
   ros::NodeHandle nh;
   ros::AsyncSpinner spinner(2);
 
-  lobot_hardware_interface::XArmHardwareInterface xArmHWInterface(nh);
+  lobot_hardware_interface::XarmHardwareInterface xarm_hardware_interface(nh);
 
   spinner.start();
   ros::waitForShutdown();
