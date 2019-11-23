@@ -9,127 +9,171 @@
 
 #define FRAME_HEADER 0x55
 
-class MyHid {
- public:
+class MyHid
+{
+public:
   MyHid() = default;
-  MyHid(const unsigned short vi, const unsigned short pi)
-      : vendorId(vi), productId(pi) {}
 
-  void Close();
-  unsigned short GetProductId() const { return productId; }
-  unsigned short GetVendorId() const { return vendorId; }
-  bool IsConnected() const { return connected; }
-  int MakeAndSendCmd(const unsigned cmd);
-  int MakeAndSendCmd(const unsigned cmd,
-                     const std::initializer_list<unsigned> &argv);
-  int MakeAndSendCmd(const unsigned cmd, const std::vector<unsigned> &argv);
-  void Open();
-  void Read(std::vector<unsigned> &data, const size_t length);
-  void SetProductId(const unsigned short pi) { productId = pi; }
-  void SetVendorId(const unsigned short vi) { vendorId = vi; }
+  MyHid(const unsigned short vendor_id, const unsigned short product_id)
+    : vendor_id_(vendor_id), product_id_(product_id)
+  {
+  }
 
- private:
-  unsigned short vendorId;
-  unsigned short productId;
-  bool connected = false;
-  hid_device *myDevice = nullptr;
+  void close();
+
+  unsigned short getProductId() const
+  {
+    return product_id_;
+  }
+
+  unsigned short getVendorId() const
+  {
+    return vendor_id_;
+  }
+
+  bool isConnected() const
+  {
+    return connected_;
+  }
+
+  int makeAndSendCmd(const unsigned cmd);
+
+  int makeAndSendCmd(const unsigned cmd, const std::initializer_list<unsigned>& argv);
+
+  int makeAndSendCmd(const unsigned cmd, const std::vector<unsigned>& argv);
+
+  void open();
+
+  void read(std::vector<unsigned>& data, const size_t length);
+
+  void setProductId(const unsigned short product_id)
+  {
+    product_id_ = product_id;
+  }
+
+  void setVendorId(const unsigned short vendor_id)
+  {
+    vendor_id_ = vendor_id;
+  }
+
+private:
+  unsigned short vendor_id_;
+  unsigned short product_id_;
+  bool connected_ = false;
+  hid_device* device_ = nullptr;
 };
 
-inline void MyHid::Close() {
-  if (connected) {
-    hid_close(myDevice);
+inline void MyHid::close()
+{
+  if (connected_)
+  {
+    hid_close(device_);
     hid_exit();
   }
 }
 
-inline int MyHid::MakeAndSendCmd(const unsigned cmd) {
-  if (!connected) {
+inline int MyHid::makeAndSendCmd(const unsigned cmd)
+{
+  if (!connected_)
+  {
     return -1;
   }
 
-  unsigned char sendBuff[256] = {0};
-  sendBuff[0] = 0x00;  // Report ID
-  sendBuff[1] = FRAME_HEADER;
-  sendBuff[2] = FRAME_HEADER;
-  sendBuff[3] = 2;
-  sendBuff[4] = static_cast<unsigned char>(cmd);
-  if (hid_write(myDevice, sendBuff, sendBuff[3] + 3) != -1) {
+  unsigned char send_buffer[256] = { 0 };
+  send_buffer[0] = 0x00;  // Report ID
+  send_buffer[1] = FRAME_HEADER;
+  send_buffer[2] = FRAME_HEADER;
+  send_buffer[3] = 2;
+  send_buffer[4] = static_cast<unsigned char>(cmd);
+  if (hid_write(device_, send_buffer, send_buffer[3] + 3) != -1)
+  {
     return 0;
   }
   return -1;
 }
 
-inline int MyHid::MakeAndSendCmd(const unsigned cmd,
-                                 const std::initializer_list<unsigned> &argv) {
-  if (!connected) {
-    return -1;
-  }
-
-  unsigned cnt = 0;
-  unsigned char sendBuff[256] = {0};
-  sendBuff[0] = 0x00;  // Report ID
-  sendBuff[1] = FRAME_HEADER;
-  sendBuff[2] = FRAME_HEADER;
-  sendBuff[4] = static_cast<unsigned char>(cmd);
-  for (const auto arg : argv) {
-    sendBuff[5 + cnt] = static_cast<unsigned char>(arg);
-    ++cnt;
-  }
-  sendBuff[3] = static_cast<unsigned char>(cnt + 2);
-  if (hid_write(myDevice, sendBuff, sendBuff[3] + 3) != -1) {
-    return 0;
-  }
-  return -1;
-}
-
-inline int MyHid::MakeAndSendCmd(const unsigned cmd,
-                                 const std::vector<unsigned> &argv) {
-  if (!connected) {
+inline int MyHid::makeAndSendCmd(const unsigned cmd, const std::initializer_list<unsigned>& argv)
+{
+  if (!connected_)
+  {
     return -1;
   }
 
   unsigned cnt = 0;
-  unsigned char sendBuff[256] = {0};
-  sendBuff[0] = 0x00;  // Report ID
-  sendBuff[1] = FRAME_HEADER;
-  sendBuff[2] = FRAME_HEADER;
-  sendBuff[4] = static_cast<unsigned char>(cmd);
-  for (const auto arg : argv) {
-    sendBuff[5 + cnt] = static_cast<unsigned char>(arg);
+  unsigned char send_buffer[256] = { 0 };
+  send_buffer[0] = 0x00;  // Report ID
+  send_buffer[1] = FRAME_HEADER;
+  send_buffer[2] = FRAME_HEADER;
+  send_buffer[4] = static_cast<unsigned char>(cmd);
+  for (const auto& arg : argv)
+  {
+    send_buffer[5 + cnt] = static_cast<unsigned char>(arg);
     ++cnt;
   }
-  sendBuff[3] = static_cast<unsigned char>(cnt + 2);
-  if (hid_write(myDevice, sendBuff, sendBuff[3] + 3) != -1) {
+  send_buffer[3] = static_cast<unsigned char>(cnt + 2);
+  if (hid_write(device_, send_buffer, send_buffer[3] + 3) != -1)
+  {
     return 0;
   }
   return -1;
 }
 
-inline void MyHid::Open() {
+inline int MyHid::makeAndSendCmd(const unsigned cmd, const std::vector<unsigned>& argv)
+{
+  if (!connected_)
+  {
+    return -1;
+  }
+
+  unsigned cnt = 0;
+  unsigned char send_buffer[256] = { 0 };
+  send_buffer[0] = 0x00;  // Report ID
+  send_buffer[1] = FRAME_HEADER;
+  send_buffer[2] = FRAME_HEADER;
+  send_buffer[4] = static_cast<unsigned char>(cmd);
+  for (const auto& arg : argv)
+  {
+    send_buffer[5 + cnt] = static_cast<unsigned char>(arg);
+    ++cnt;
+  }
+  send_buffer[3] = static_cast<unsigned char>(cnt + 2);
+  if (hid_write(device_, send_buffer, send_buffer[3] + 3) != -1)
+  {
+    return 0;
+  }
+  return -1;
+}
+
+inline void MyHid::open()
+{
   hid_init();
 
-  myDevice = hid_open(vendorId, productId, nullptr);
-  if (!myDevice) {
+  device_ = hid_open(vendor_id_, product_id_, nullptr);
+  if (!device_)
+  {
     throw std::runtime_error("Cannot open HID device!");
   }
 
-  connected = true;
+  connected_ = true;
 }
 
-inline void MyHid::Read(std::vector<unsigned> &data, const size_t length) {
-  if (length > 256) {
+inline void MyHid::read(std::vector<unsigned>& data, const size_t length)
+{
+  if (length > 256)
+  {
     return;
   }
 
   data.reserve(length);
-  unsigned char recvBuff[256] = {0};
+  unsigned char receive_buffer[256] = { 0 };
 
-  hid_read(myDevice, recvBuff, length + 2);
-  if (recvBuff[0] == FRAME_HEADER && recvBuff[1] == FRAME_HEADER &&
-      recvBuff[2] == length) {
+  hid_read(device_, receive_buffer, length + 2);
+  if (receive_buffer[0] == FRAME_HEADER && receive_buffer[1] == FRAME_HEADER && receive_buffer[2] == length)
+  {
     size_t i = 3;
-    while (i < length + 2) {
-      data.push_back(recvBuff[i]);
+    while (i < length + 2)
+    {
+      data.push_back(receive_buffer[i]);
       ++i;
     }
   }
