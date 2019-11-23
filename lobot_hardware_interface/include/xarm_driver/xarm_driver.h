@@ -27,14 +27,14 @@ public:
 
   void execute(const std::array<double, SERVO_NUM>& cmd, const ros::Duration& period);
 
-  void getJointState(std::array<double, SERVO_NUM>& joint_state);
+  void getJointStates(std::array<double, SERVO_NUM>& joint_states);
 
 protected:
   MyHid my_hid_;
-  std::array<int, SERVO_NUM> servo_position_;
+  std::array<int, SERVO_NUM> servo_positions_;
 
 private:
-  void getCurrentServoPosition();
+  void getCurrentServoPositions();
 
   void init();
 
@@ -44,43 +44,44 @@ private:
 
 inline void XarmDriver::execute(const std::array<double, SERVO_NUM>& cmd, const ros::Duration& period)
 {
-  std::array<int, SERVO_NUM> position_cmd;
+  std::array<int, SERVO_NUM> position_cmds;
 
   // Commands for arm joints, convert radians to positions
   for (auto i = 0; i != JOINT_NUM; ++i)
   {
-    position_cmd[i] = (i == 1) ? (500 - 750 * cmd[i] / M_PI) : (500 + 750 * cmd[i] / M_PI);
+    position_cmds[i] = (i == 1) ? (500 - 750 * cmd[i] / M_PI) : (500 + 750 * cmd[i] / M_PI);
   }
 
   // Command for gripper joint
   auto gripper_cmd = (0.03 - cmd[GRIPPER_ID]) * 2000;
-  position_cmd[GRIPPER_ID] = -0.003073 * gripper_cmd * gripper_cmd * gripper_cmd +
-                             0.212188 * gripper_cmd * gripper_cmd - 10.335171 * gripper_cmd + 700.907820;
+  position_cmds[GRIPPER_ID] = -0.003073 * gripper_cmd * gripper_cmd * gripper_cmd +
+                              0.212188 * gripper_cmd * gripper_cmd - 10.335171 * gripper_cmd + 700.907820;
 
   // Send commands
-  spinServos({ 2, 3, 4, 5, 6 }, { position_cmd[4], position_cmd[3], position_cmd[2], position_cmd[1], position_cmd[0] },
+  spinServos({ 2, 3, 4, 5, 6 },
+             { position_cmds[4], position_cmds[3], position_cmds[2], position_cmds[1], position_cmds[0] },
              period.toSec() * 1000);
-  spinServos({ 1 }, { position_cmd[GRIPPER_ID] }, 600);
+  spinServos({ 1 }, { position_cmds[GRIPPER_ID] }, 600);
 }
 
-inline void XarmDriver::getJointState(std::array<double, SERVO_NUM>& joint_state)
+inline void XarmDriver::getJointStates(std::array<double, SERVO_NUM>& joint_states)
 {
-  getCurrentServoPosition();
+  getCurrentServoPositions();
 
   // State of arm joints, convert positions to radians
   for (auto i = 1; i != SERVO_NUM; ++i)
   {
-    joint_state[JOINT_NUM - i] =
-        (i == 4) ? ((500 - servo_position_[i]) * M_PI / 750) : ((servo_position_[i] - 500) * M_PI / 750);
+    joint_states[JOINT_NUM - i] =
+        (i == 4) ? ((500 - servo_positions_[i]) * M_PI / 750) : ((servo_positions_[i] - 500) * M_PI / 750);
   }
 
   // State of the gripper joint, mapped from angle to distance
-  joint_state[GRIPPER_ID] =
+  joint_states[GRIPPER_ID] =
       0.03 -
-      (-1.213930e-4 * servo_position_[0] * servo_position_[0] - 0.015326 * servo_position_[0] + 67.610949) / 2000;
+      (-1.213930e-4 * servo_positions_[0] * servo_positions_[0] - 0.015326 * servo_positions_[0] + 67.610949) / 2000;
 }
 
-inline void XarmDriver::getCurrentServoPosition()
+inline void XarmDriver::getCurrentServoPositions()
 {
   my_hid_.makeAndSendCmd(CMD_MULT_SERVO_POS_READ, { SERVO_NUM, 1, 2, 3, 4, 5, 6 });
   std::vector<unsigned> received_data;
@@ -88,9 +89,9 @@ inline void XarmDriver::getCurrentServoPosition()
 
   if (received_data.size() != 0 && received_data[0] == CMD_MULT_SERVO_POS_READ && received_data[1] == SERVO_NUM)
   {
-    auto position_it = servo_position_.begin();
+    auto position_it = servo_positions_.begin();
     decltype(received_data.size()) i = 0;
-    while (position_it != servo_position_.end())
+    while (position_it != servo_positions_.end())
     {
       *position_it = static_cast<int>(received_data[3 * i + 3]) + static_cast<int>(received_data[3 * i + 4] << 8);
       ++position_it;
