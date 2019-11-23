@@ -2,12 +2,12 @@
 
 namespace lobot_hardware_interface
 {
-XArmDriver::XArmDriver()
+XarmDriver::XarmDriver()
 {
-  myHid_ = MyHid(0x0483, 0x5750);
+  my_hid_ = MyHid(0x0483, 0x5750);
   try
   {
-    myHid_.open();
+    my_hid_.open();
   }
   catch (std::runtime_error err)
   {
@@ -17,17 +17,17 @@ XArmDriver::XArmDriver()
 
   ROS_INFO_NAMED("xarm_hardware_interface", "xArm control board connected");
 
-  Init();
+  init();
 }
 
-XArmDriver::~XArmDriver()
+XarmDriver::~XarmDriver()
 {
-  myHid_.close();
+  my_hid_.close();
 }
 
-void XArmDriver::Init()
+void XarmDriver::init()
 {
-  SpinServos({ 1, 2, 3, 4, 5, 6 }, { 200, 500, 500, 500, 500, 500 });
+  spinServos({ 1, 2, 3, 4, 5, 6 }, { 200, 500, 500, 500, 500, 500 });
   ros::Duration(2).sleep();
   ROS_INFO_NAMED("xarm_hardware_interface", "Arm joints initialized");
 }

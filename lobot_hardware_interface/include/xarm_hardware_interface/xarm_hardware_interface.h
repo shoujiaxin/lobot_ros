@@ -12,10 +12,11 @@
 
 #include "xarm_driver/xarm_driver.h"
 
-namespace lobot_hardware_interface {
-
-class XArmHardwareInterface : public hardware_interface::RobotHW {
- public:
+namespace lobot_hardware_interface
+{
+class XArmHardwareInterface : public hardware_interface::RobotHW
+{
+public:
   XArmHardwareInterface(ros::NodeHandle& nh);
   ~XArmHardwareInterface();
 
@@ -23,7 +24,7 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   void update(const ros::TimerEvent& e);
   void write(const ros::Time& time, const ros::Duration& period) override;
 
- private:
+private:
   ros::NodeHandle nh_;
 
   // Interfaces
@@ -33,19 +34,18 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
   controller_manager::ControllerManager controllerManager_;
 
   // Shared memory
-  std::array<double, SERVO_NUM> jointPosition_{0};
-  std::array<double, SERVO_NUM> jointVelocity_{0};
-  std::array<double, SERVO_NUM> jointEffort_{0};
-  std::array<double, SERVO_NUM> jointPositionCmd_{0};
+  std::array<double, SERVO_NUM> jointPosition_{ 0 };
+  std::array<double, SERVO_NUM> jointVelocity_{ 0 };
+  std::array<double, SERVO_NUM> jointEffort_{ 0 };
+  std::array<double, SERVO_NUM> jointPositionCmd_{ 0 };
 
   // Driver
-  XArmDriver xArmDriver_;
+  XarmDriver xArmDriver_;
 
   ros::Timer timer;
 
   // Gripper control
-  actionlib::SimpleActionServer<control_msgs::GripperCommandAction>
-      gripperCmdServer_;
+  actionlib::SimpleActionServer<control_msgs::GripperCommandAction> gripperCmdServer_;
   control_msgs::GripperCommandFeedback gripperCmdFeedback_;
   control_msgs::GripperCommandResult gripperCmdResult_;
 
@@ -53,12 +53,13 @@ class XArmHardwareInterface : public hardware_interface::RobotHW {
 };
 
 // Get joints' current angles
-inline void XArmHardwareInterface::read(const ros::Time& time,
-                                        const ros::Duration& period) {
-  xArmDriver_.GetJointState(jointPosition_);
+inline void XArmHardwareInterface::read(const ros::Time& time, const ros::Duration& period)
+{
+  xArmDriver_.getJointState(jointPosition_);
 }
 
-inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
+inline void XArmHardwareInterface::update(const ros::TimerEvent& e)
+{
   auto currTime = ros::Time::now();
   auto period = ros::Duration(e.current_real - e.last_real);
 
@@ -68,9 +69,9 @@ inline void XArmHardwareInterface::update(const ros::TimerEvent& e) {
 }
 
 // Send commands to control board
-inline void XArmHardwareInterface::write(const ros::Time& time,
-                                         const ros::Duration& period) {
-  xArmDriver_.Execute(jointPositionCmd_, period);
+inline void XArmHardwareInterface::write(const ros::Time& time, const ros::Duration& period)
+{
+  xArmDriver_.execute(jointPositionCmd_, period);
 }
 
 }  // namespace lobot_hardware_interface
