@@ -72,7 +72,7 @@ private:
 
   bool revisePose(geometry_msgs::Pose& pose) const;
 
-  bool solveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r, std::vector<double>& solution) const;
+  bool solveIk(const geometry_msgs::Pose& ik_pose, std::vector<double>& solution) const;
 };
 
 }  // namespace xarm_kinematics_plugin

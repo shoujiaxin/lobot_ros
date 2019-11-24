@@ -120,16 +120,16 @@ bool XarmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                             moveit_msgs::MoveItErrorCodes& error_code,
                                             const kinematics::KinematicsQueryOptions& options) const
 {
-  auto pose = ik_pose;  // Make a copy of the pose
-  if (!isPoseReachable(pose) && !revisePose(pose))
-  {
-    ROS_ERROR_NAMED("xarm_kinematics_plugin", "The target pose is not reachable");
-    return false;
-  }
+  // auto pose = ik_pose;  // Make a copy of the pose
+  // if (!isPoseReachable(pose) && !revisePose(pose))
+  // {
+  //   ROS_ERROR_NAMED("xarm_kinematics_plugin", "The target pose is not reachable");
+  //   return false;
+  // }
 
-  tf::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
-  tf::Matrix3x3 rotation_matrix(q);
-  if (!solveIk(pose.position, rotation_matrix, solution))
+  // tf::Quaternion q(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+  // tf::Matrix3x3 rotation_matrix(q);
+  if (!solveIk(ik_pose, solution))
   {
     error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
     return false;
@@ -196,8 +196,25 @@ bool XarmKinematicsPlugin::revisePose(geometry_msgs::Pose& pose) const
   return isPoseReachable(pose);
 }
 
-bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Point& p, tf::Matrix3x3& r, std::vector<double>& solution) const
+bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Pose& ik_pose, std::vector<double>& solution) const
 {
+  auto p = ik_pose.position;
+
+  double roll, pitch, yaw;
+  quaternionToRpy(ik_pose.orientation, roll, pitch, yaw);
+
+  tf::Matrix3x3 r;
+  if (p.x == 0 && p.y == 0)
+  {
+    r.setRPY(roll, pitch, 0);
+    r *= tf::Matrix3x3(0, 0, 1, 0, -1, 0, 1, 0, 0);
+  }
+  else
+  {
+    yaw = atan2(p.y, p.x);
+    r.setRPY(roll, pitch, yaw);
+  }
+
   for (int i = 0; i < 3; ++i)
   {
     for (int j = 0; j < 3; ++j)
@@ -299,9 +316,20 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Point& p, tf::Matrix3x3&
   double s2 = sin(t2);
   double c2 = cos(t2);
 
-  double numerator = a1 - px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3;
-  numerator = (abs(numerator) < FLT_EPSILON) ? 0 : numerator;
-  std::complex<double> theta1 = 2 * atan(sqrt(numerator / (a1 + px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3)));
+  std::complex<double> theta1;
+  double theta1_numerator = a1 - px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3;
+  if (abs(theta1_numerator) < FLT_EPSILON)
+  {
+    theta1 = 0;
+  }
+  else if (p.x == 0 && p.y == 0 && roll < 0)
+  {
+    theta1 = -2 * atan(sqrt(theta1_numerator / (a1 + px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3)));
+  }
+  else
+  {
+    theta1 = 2 * atan(sqrt(theta1_numerator / (a1 + px + a2 * c2 + a3 * c2 * c3 - a3 * s2 * s3)));
+  }
   double t1 = real(theta1);
   double s1 = sin(t1);
   double c1 = cos(t1);
@@ -372,6 +400,7 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Point& p, tf::Matrix3x3&
                          c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
                          c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
                          c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
+  t5 = asin(sin(t5));
 
   solution.resize(JOINT_NUM);
   solution[0] = t1;                                // arm_joint1
