@@ -687,12 +687,12 @@ bool XarmKinematicsPlugin::solveIkFromAllPossibleSolutions(const geometry_msgs::
                     c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
                     c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
-    std::vector<double> possible_solution(5, 0);
-    possible_solution.push_back(t1);
-    possible_solution.push_back(t2 + M_PI / 2);
-    possible_solution.push_back(t3);
-    possible_solution.push_back(t4 + M_PI / 2);
-    possible_solution.push_back(asin(sin(t5)));
+    std::vector<double> possible_solution(JOINT_NUM, 0);
+    possible_solution[0] = (t1);
+    possible_solution[1] = (t2 + M_PI / 2);
+    possible_solution[2] = (t3);
+    possible_solution[3] = (t4 + M_PI / 2);
+    possible_solution[4] = (asin(sin(t5)));
 
     all_solutions.push_back(possible_solution);
   }
