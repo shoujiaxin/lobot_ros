@@ -68,11 +68,15 @@ private:
 
   bool isPoseReachable(const geometry_msgs::Pose& pose) const;
 
+  bool isSolutionValid(const std::vector<double>& solution) const;
+
   void quaternionToRpy(const geometry_msgs::Quaternion& q, double& roll, double& pitch, double& yaw) const;
 
   bool revisePose(geometry_msgs::Pose& pose) const;
 
   bool solveIk(const geometry_msgs::Pose& ik_pose, std::vector<double>& solution) const;
+
+  bool solveIkFromAllPossibleSolutions(const geometry_msgs::Pose& ik_pose, std::vector<double>& solution) const;
 };
 
 }  // namespace xarm_kinematics_plugin
