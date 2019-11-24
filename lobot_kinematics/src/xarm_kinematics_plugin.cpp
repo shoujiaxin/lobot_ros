@@ -224,36 +224,38 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Pose& ik_pose, std::vect
   constexpr double a1 = 0.003;
   constexpr double a2 = 0.096;
   constexpr double a3 = 0.096;
-  constexpr double baseHeight = 0.072;  // Height of base relative to world
-  constexpr double toolLength = 0.12;   // Length of terminal tool
+  constexpr double base_height = 0.072;  // Height of base relative to world
+  constexpr double tool_length = 0.12;   // Length of terminal tool
 
   // Transformation from the tool frame to the last frame on the manipulator
   double nx = r[0][2], ny = r[1][2], nz = r[2][2];
   double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
   double ax = r[0][0], ay = r[1][0], az = r[2][0];
-  double px = p.x - toolLength * r[0][0];
-  double py = p.y - toolLength * r[1][0];
-  double pz = p.z - toolLength * r[2][0] - baseHeight;
+  double px = p.x - tool_length * r[0][0];
+  double py = p.y - tool_length * r[1][0];
+  double pz = p.z - tool_length * r[2][0] - base_height;
 
-  std::complex<double> theta3;
-  const double theta3_numerator = 2 * a1 * a1 * a2 * a2 - a2 * a2 * a2 * a2 - a3 * a3 * a3 * a3 - px * px * px * px -
-                                  py * py * py * py - pz * pz * pz * pz - a1 * a1 * a1 * a1 + 2 * a1 * a1 * a3 * a3 +
-                                  2 * a2 * a2 * a3 * a3 + 2 * a1 * a1 * px * px + 2 * a2 * a2 * px * px +
-                                  2 * a3 * a3 * px * px + 2 * a1 * a1 * py * py + 2 * a2 * a2 * py * py +
-                                  2 * a3 * a3 * py * py - 2 * a1 * a1 * pz * pz + 2 * a2 * a2 * pz * pz +
-                                  2 * a3 * a3 * pz * pz - 2 * px * px * py * py - 2 * px * px * pz * pz -
-                                  2 * py * py * pz * pz + 8 * a1 * a2 * a3 * sqrt(px * px + py * py);
-  if (theta3_numerator < 0)
+  // Singular point
+  const double temp = 2 * a1 * a1 * a2 * a2 - a2 * a2 * a2 * a2 - a3 * a3 * a3 * a3 - px * px * px * px -
+                      py * py * py * py - pz * pz * pz * pz - a1 * a1 * a1 * a1 + 2 * a1 * a1 * a3 * a3 +
+                      2 * a2 * a2 * a3 * a3 + 2 * a1 * a1 * px * px + 2 * a2 * a2 * px * px + 2 * a3 * a3 * px * px +
+                      2 * a1 * a1 * py * py + 2 * a2 * a2 * py * py + 2 * a3 * a3 * py * py - 2 * a1 * a1 * pz * pz +
+                      2 * a2 * a2 * pz * pz + 2 * a3 * a3 * pz * pz - 2 * px * px * py * py - 2 * px * px * pz * pz -
+                      2 * py * py * pz * pz + 8 * a1 * a2 * a3 * sqrt(px * px + py * py);
+  if (temp < 0)
   {
     r.setRPY(roll, pitch, 0);
     r *= tf::Matrix3x3(0, 0, 1, 0, -1, 0, 1, 0, 0);
     nx = r[0][2], ny = r[1][2], nz = r[2][2];
     ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
     ax = r[0][0], ay = r[1][0], az = r[2][0];
-    px = p.x - toolLength * r[0][0];
-    py = p.y - toolLength * r[1][0];
-    pz = p.z - toolLength * r[2][0] - baseHeight;
+    px = p.x - tool_length * r[0][0];
+    py = p.y - tool_length * r[1][0];
+    pz = p.z - tool_length * r[2][0] - base_height;
   }
+
+  // Theta 3
+  std::complex<double> theta3;
   if (p.y >= 0)
   {
     theta3 =
