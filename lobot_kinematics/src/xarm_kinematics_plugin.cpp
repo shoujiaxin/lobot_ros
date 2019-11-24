@@ -203,18 +203,12 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Pose& ik_pose, std::vect
   double roll, pitch, yaw;
   quaternionToRpy(ik_pose.orientation, roll, pitch, yaw);
 
+  // Convert quaternion to rotation matrix
   tf::Matrix3x3 r;
-  if (p.x == 0 && p.y == 0)
-  {
-    r.setRPY(roll, pitch, 0);
-    r *= tf::Matrix3x3(0, 0, 1, 0, -1, 0, 1, 0, 0);
-  }
-  else
-  {
-    yaw = atan2(p.y, p.x);
-    r.setRPY(roll, pitch, yaw);
-  }
+  yaw = atan2(p.y, p.x);
+  r.setRPY(roll, pitch, yaw);
 
+  // Simplify the rotation matrix
   for (int i = 0; i < 3; ++i)
   {
     for (int j = 0; j < 3; ++j)
@@ -226,20 +220,40 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Pose& ik_pose, std::vect
     }
   }
 
+  // Parameters
   constexpr double a1 = 0.003;
   constexpr double a2 = 0.096;
   constexpr double a3 = 0.096;
   constexpr double baseHeight = 0.072;  // Height of base relative to world
   constexpr double toolLength = 0.12;   // Length of terminal tool
 
-  const double nx = r[0][2], ny = r[1][2], nz = r[2][2];
-  const double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
-  const double ax = r[0][0], ay = r[1][0], az = r[2][0];
-  const double px = p.x - toolLength * r[0][0];
-  const double py = p.y - toolLength * r[1][0];
-  const double pz = p.z - toolLength * r[2][0] - baseHeight;
+  // Transformation from the tool frame to the last frame on the manipulator
+  double nx = r[0][2], ny = r[1][2], nz = r[2][2];
+  double ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
+  double ax = r[0][0], ay = r[1][0], az = r[2][0];
+  double px = p.x - toolLength * r[0][0];
+  double py = p.y - toolLength * r[1][0];
+  double pz = p.z - toolLength * r[2][0] - baseHeight;
 
   std::complex<double> theta3;
+  const double theta3_numerator = 2 * a1 * a1 * a2 * a2 - a2 * a2 * a2 * a2 - a3 * a3 * a3 * a3 - px * px * px * px -
+                                  py * py * py * py - pz * pz * pz * pz - a1 * a1 * a1 * a1 + 2 * a1 * a1 * a3 * a3 +
+                                  2 * a2 * a2 * a3 * a3 + 2 * a1 * a1 * px * px + 2 * a2 * a2 * px * px +
+                                  2 * a3 * a3 * px * px + 2 * a1 * a1 * py * py + 2 * a2 * a2 * py * py +
+                                  2 * a3 * a3 * py * py - 2 * a1 * a1 * pz * pz + 2 * a2 * a2 * pz * pz +
+                                  2 * a3 * a3 * pz * pz - 2 * px * px * py * py - 2 * px * px * pz * pz -
+                                  2 * py * py * pz * pz + 8 * a1 * a2 * a3 * sqrt(px * px + py * py);
+  if (theta3_numerator < 0)
+  {
+    r.setRPY(roll, pitch, 0);
+    r *= tf::Matrix3x3(0, 0, 1, 0, -1, 0, 1, 0, 0);
+    nx = r[0][2], ny = r[1][2], nz = r[2][2];
+    ox = -r[0][1], oy = -r[1][1], oz = -r[2][1];
+    ax = r[0][0], ay = r[1][0], az = r[2][0];
+    px = p.x - toolLength * r[0][0];
+    py = p.y - toolLength * r[1][0];
+    pz = p.z - toolLength * r[2][0] - baseHeight;
+  }
   if (p.y >= 0)
   {
     theta3 =
@@ -356,75 +370,70 @@ bool XarmKinematicsPlugin::solveIk(const geometry_msgs::Pose& ik_pose, std::vect
   double s4 = sin(t4);
   double c4 = cos(t4);
 
-  double t5 = atan(((oz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
-                        (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 + c2 * c2 * c4 * c4 * s3 * s3 +
-                         c2 * c2 * s3 * s3 * s4 * s4 + c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) +
-                    (oy * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 - c2 * c3 * c4 * s1)) /
-                        (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
-                         c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
-                         c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
-                         c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
-                         c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
-                         c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
-                         c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) +
-                    (c1 * ox * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
-                        (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
-                         c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
-                         c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
-                         c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
-                         c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
-                         c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
-                         c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)) /
-                   (-(nz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
-                        (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 + c2 * c2 * c4 * c4 * s3 * s3 +
-                         c2 * c2 * s3 * s3 * s4 * s4 + c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) -
-                    (ny * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 - c2 * c3 * c4 * s1)) /
-                        (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
-                         c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
-                         c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
-                         c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
-                         c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
-                         c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
-                         c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) -
-                    (c1 * nx * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
-                        (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
-                         c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
-                         c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
-                         c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
-                         c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
-                         c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
-                         c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
-                         c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
-  t5 = asin(sin(t5));
+  double t5 = atan2(((oz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
+                         (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 + c2 * c2 * c4 * c4 * s3 * s3 +
+                          c2 * c2 * s3 * s3 * s4 * s4 + c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) +
+                     (oy * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 - c2 * c3 * c4 * s1)) /
+                         (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+                          c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+                          c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+                          c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+                          c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+                          c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+                          c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) +
+                     (c1 * ox * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
+                         (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+                          c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+                          c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+                          c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+                          c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+                          c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+                          c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)),
+                    (-(nz * (c2 * c3 * s4 + c2 * c4 * s3 + c3 * c4 * s2 - s2 * s3 * s4)) /
+                         (c2 * c2 * c3 * c3 * c4 * c4 + c2 * c2 * c3 * c3 * s4 * s4 + c2 * c2 * c4 * c4 * s3 * s3 +
+                          c2 * c2 * s3 * s3 * s4 * s4 + c3 * c3 * c4 * c4 * s2 * s2 + c3 * c3 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s2 * s2 * s3 * s3 + s2 * s2 * s3 * s3 * s4 * s4) -
+                     (ny * (c2 * s1 * s3 * s4 + c3 * s1 * s2 * s4 + c4 * s1 * s2 * s3 - c2 * c3 * c4 * s1)) /
+                         (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+                          c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+                          c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+                          c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+                          c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+                          c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+                          c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4) -
+                     (c1 * nx * (c2 * s3 * s4 - c2 * c3 * c4 + c3 * s2 * s4 + c4 * s2 * s3)) /
+                         (c1 * c1 * c2 * c2 * c3 * c3 * c4 * c4 + c1 * c1 * c2 * c2 * c3 * c3 * s4 * s4 +
+                          c1 * c1 * c2 * c2 * c4 * c4 * s3 * s3 + c1 * c1 * c2 * c2 * s3 * s3 * s4 * s4 +
+                          c1 * c1 * c3 * c3 * c4 * c4 * s2 * s2 + c1 * c1 * c3 * c3 * s2 * s2 * s4 * s4 +
+                          c1 * c1 * c4 * c4 * s2 * s2 * s3 * s3 + c1 * c1 * s2 * s2 * s3 * s3 * s4 * s4 +
+                          c2 * c2 * c3 * c3 * c4 * c4 * s1 * s1 + c2 * c2 * c3 * c3 * s1 * s1 * s4 * s4 +
+                          c2 * c2 * c4 * c4 * s1 * s1 * s3 * s3 + c2 * c2 * s1 * s1 * s3 * s3 * s4 * s4 +
+                          c3 * c3 * c4 * c4 * s1 * s1 * s2 * s2 + c3 * c3 * s1 * s1 * s2 * s2 * s4 * s4 +
+                          c4 * c4 * s1 * s1 * s2 * s2 * s3 * s3 + s1 * s1 * s2 * s2 * s3 * s3 * s4 * s4)));
 
   solution.resize(JOINT_NUM);
-  solution[0] = t1;                                // arm_joint1
-  solution[1] = t2 + M_PI / 2;                     // arm_joint2
-  solution[2] = t3;                                // arm_joint3
-  solution[3] = t4 + M_PI / 2;                     // arm_joint4
-  solution[4] = (abs(t5) < FLT_EPSILON) ? 0 : t5;  // arm_joint5
+  solution[0] = t1;             // arm_joint1
+  solution[1] = t2 + M_PI / 2;  // arm_joint2
+  solution[2] = t3;             // arm_joint3
+  solution[3] = t4 + M_PI / 2;  // arm_joint4
+  solution[4] = asin(sin(t5));  // arm_joint5
 
-  // Workaround to aviod crash
-  for (const auto& s : solution)
+  // Check the solution and joints' limits
+  for (auto i = 0; i < JOINT_NUM; ++i)
   {
-    if (std::isnan(s))
+    if (std::isnan(solution[i]))
     {
+      ROS_ERROR_NAMED("xarm_kinematics_plugin", "The value of arm_joint%d is not a number", i + 1);
       return false;
     }
-  }
-
-  // Check joints' limit
-  for (int i = 0; i < JOINT_NUM; ++i)
-  {
-    if (solution[i] < lower_limits_[i] || solution[i] > upper_limits_[i])
+    else if (solution[i] < lower_limits_[i] || solution[i] > upper_limits_[i])
     {
       ROS_ERROR_NAMED("xarm_kinematics_plugin", "The value of arm_joint%d (%f) is out of bounds", i + 1, solution[i]);
-      return false;
+      // return false;
     }
   }
 
