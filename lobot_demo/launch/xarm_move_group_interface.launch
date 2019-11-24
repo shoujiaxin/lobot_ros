@@ -1,7 +1,7 @@
 <launch>
 
   <!-- Launch the real robot -->
-  <include file="$(find lobot_xarm)/launch/moveit.launch" />
+  <include file="$(find lobot_xarm)/launch/moveit_gazebo.launch" />
 
   <node name="xarm_move_group_interface" pkg="lobot_demo" type="xarm_move_group_interface" respawn="false" output="screen" />
 
